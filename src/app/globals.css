@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-radius: 0px !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root {
+  --canvas: #0B0D10;
+  --surface-dark: #12151D;
+  --surface-dark-elevated: #1A1F2B;
+  --surface-border: #282F40;
+  --coral: #FF5C58;
+  --yellow: #FFE600;
+  --blue: #2D7FF9;
+  --green: #00E599;
+}
+
+/* Neo-Brutalist Hard Drop Shadows */
+.brutal-shadow {
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.brutal-shadow-sm {
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.brutal-shadow-coral {
+  box-shadow: 4px 4px 0px #FF5C58;
+}
+
+.brutal-shadow-yellow {
+  box-shadow: 4px 4px 0px #FFE600;
+}
+
+.brutal-shadow-blue {
+  box-shadow: 4px 4px 0px #2D7FF9;
+}
+
+.brutal-shadow-white {
+  box-shadow: 4px 4px 0px #FFFFFF;
+}
+
+/* Tactile push effect on click */
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px transparent !important;
+}
+
+/* Neo-Brutalist Grid Pattern Background for Hero */
+.brutal-grid-bg {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+.brutal-grid-bg-light {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0D10;
+}
+::-webkit-scrollbar-thumb {
+  background: #282F40;
+  border: 1px solid #000;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #FF5C58;
+}
+
+/* Monospace numbers for ratings and timers */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
 }
