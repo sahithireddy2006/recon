@@ -1,15 +1,15 @@
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
+import bcrypt from "bcryptjs";
 
-// Connection string from environment variable
+// Neon PostgreSQL connection string
 const connectionString =
   process.env.DATABASE_URL ||
   "postgresql://neondb_owner:npg_bimRTwE9JjW7@ep-orange-cake-a7c1wfpb-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
-// Export raw serverless sql client
 export const sql = neon(connectionString);
 
 /**
- * Check if Neon database is reachable
+ * Check Neon DB connectivity
  */
 export async function checkDatabaseConnection(): Promise<{
   connected: boolean;
@@ -32,9 +32,12 @@ export async function checkDatabaseConnection(): Promise<{
 }
 
 /**
- * Create base tables for RECON LMS in Neon DB if they don't already exist
+ * Initialize all database tables, columns, indexes, and initial demo accounts
  */
-export async function initializeDatabaseSchema(): Promise<{ success: boolean; message: string }> {
+export async function initializeDatabaseSchema(): Promise<{
+  success: boolean;
+  message: string;
+}> {
   try {
     // 1. Users table
     await sql`
@@ -42,8 +45,9 @@ export async function initializeDatabaseSchema(): Promise<{ success: boolean; me
         id VARCHAR(64) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         handle VARCHAR(64) UNIQUE NOT NULL,
-        role VARCHAR(32) NOT NULL,
+        role VARCHAR(32) NOT NULL DEFAULT 'student',
         email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255),
         avatar TEXT,
         bio TEXT,
         rating INTEGER DEFAULT 1200,
@@ -53,50 +57,46 @@ export async function initializeDatabaseSchema(): Promise<{ success: boolean; me
         is_public BOOLEAN DEFAULT true,
         semester INTEGER DEFAULT 1,
         department VARCHAR(255),
+        status VARCHAR(32) DEFAULT 'Active',
         created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `;
 
-    // 2. Subjects table
+    // Ensure password_hash and status columns exist if table was previously created without them
+    await sql`ALTER TABLE lms_users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);`;
+    await sql`ALTER TABLE lms_users ADD COLUMN IF NOT EXISTS status VARCHAR(32) DEFAULT 'Active';`;
+
+    // 2. Lesson progress table
     await sql`
-      CREATE TABLE IF NOT EXISTS lms_subjects (
-        id VARCHAR(64) PRIMARY KEY,
-        code VARCHAR(32) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        semester INTEGER NOT NULL,
-        credits INTEGER NOT NULL,
-        instructor_name VARCHAR(255),
-        instructor_email VARCHAR(255),
-        description TEXT,
-        progress_percent INTEGER DEFAULT 0,
-        color VARCHAR(32) DEFAULT 'coral',
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      CREATE TABLE IF NOT EXISTS lms_lesson_progress (
+        user_id VARCHAR(64) REFERENCES lms_users(id) ON DELETE CASCADE,
+        subject_id VARCHAR(64) NOT NULL,
+        lesson_id VARCHAR(64) NOT NULL,
+        completed BOOLEAN DEFAULT true,
+        completed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        PRIMARY KEY (user_id, subject_id, lesson_id)
       );
     `;
 
-    // 3. Contests table
+    // 3. Test attempts table
     await sql`
-      CREATE TABLE IF NOT EXISTS lms_contests (
-        id VARCHAR(64) PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        code VARCHAR(32) NOT NULL,
-        type VARCHAR(64) NOT NULL,
-        status VARCHAR(32) NOT NULL,
-        start_time TIMESTAMP WITH TIME ZONE,
-        end_time TIMESTAMP WITH TIME ZONE,
-        duration_minutes INTEGER NOT NULL,
-        participants_count INTEGER DEFAULT 0,
-        problems_count INTEGER DEFAULT 4,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      CREATE TABLE IF NOT EXISTS lms_test_attempts (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(64) REFERENCES lms_users(id) ON DELETE CASCADE,
+        subject_id VARCHAR(64) NOT NULL,
+        test_id VARCHAR(64) NOT NULL,
+        score INTEGER NOT NULL,
+        passed BOOLEAN NOT NULL,
+        attempted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
       );
     `;
 
-    // 4. Submissions table
+    // 4. Contest Submissions table
     await sql`
       CREATE TABLE IF NOT EXISTS lms_submissions (
         id SERIAL PRIMARY KEY,
-        user_id VARCHAR(64) NOT NULL,
-        contest_id VARCHAR(64),
+        user_id VARCHAR(64) REFERENCES lms_users(id) ON DELETE CASCADE,
+        contest_id VARCHAR(64) NOT NULL,
         problem_id VARCHAR(64) NOT NULL,
         code TEXT NOT NULL,
         language VARCHAR(32) NOT NULL,
@@ -108,12 +108,106 @@ export async function initializeDatabaseSchema(): Promise<{ success: boolean; me
       );
     `;
 
+    // 5. Seed default demo accounts with hashed passwords if missing
+    const defaultPasswordHash = bcrypt.hashSync("password123", 10);
+
+    // Student Alex Chen
+    await sql`
+      INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
+      VALUES (
+        'usr_student_01',
+        'Alex Chen',
+        'alex_chen',
+        'student',
+        'alex.chen@student.recon.edu',
+        ${defaultPasswordHash},
+        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        'CS Undergraduate @ RECON. Systems programmer, competitive coder, algorithm enthusiast. Aiming for Grandmaster.',
+        1742,
+        1810,
+        18,
+        142,
+        true,
+        4,
+        'Computer Science & Engineering',
+        'Active'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        password_hash = EXCLUDED.password_hash,
+        rating = EXCLUDED.rating;
+    `;
+
+    // Teacher Dr. Marcus Vance
+    await sql`
+      INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
+      VALUES (
+        'usr_teacher_01',
+        'Dr. Marcus Vance',
+        'prof_vance',
+        'teacher',
+        'marcus.vance@faculty.recon.edu',
+        ${defaultPasswordHash},
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        'Associate Professor of Computer Science. Research in Distributed Systems, High-Performance Query Engines, and OS Kernels.',
+        2315,
+        2420,
+        84,
+        520,
+        true,
+        4,
+        'Computer Science & Engineering',
+        'Active'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        password_hash = EXCLUDED.password_hash;
+    `;
+
+    // Admin Eleanor Wright
+    await sql`
+      INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
+      VALUES (
+        'usr_admin_01',
+        'Eleanor Wright',
+        'admin_wright',
+        'admin',
+        'eleanor.wright@admin.recon.edu',
+        ${defaultPasswordHash},
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+        'Platform Administrator & Chief Academic Director. Managing academic infrastructure, student quotas, and contest governance.',
+        1980,
+        2050,
+        45,
+        310,
+        false,
+        4,
+        'Academic Operations',
+        'Active'
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        password_hash = EXCLUDED.password_hash;
+    `;
+
+    // Pre-seed some default lesson progress for Alex Chen if none exists
+    await sql`
+      INSERT INTO lms_lesson_progress (user_id, subject_id, lesson_id, completed)
+      VALUES 
+        ('usr_student_01', 'cs201', 'les_cs201_01', true),
+        ('usr_student_01', 'cs201', 'les_cs201_02', true),
+        ('usr_student_01', 'cs201', 'les_cs201_03', true),
+        ('usr_student_01', 'cs202', 'les_cs202_01', true),
+        ('usr_student_01', 'cs203', 'les_cs203_01', true),
+        ('usr_student_01', 'cs203', 'les_cs203_02', true)
+      ON CONFLICT (user_id, subject_id, lesson_id) DO NOTHING;
+    `;
+
     return {
       success: true,
-      message: "Neon Postgres schema initialized successfully (users, subjects, contests, submissions).",
+      message:
+        "Neon DB initialized with tables, columns, indexes, and pre-seeded unique accounts (Alex Chen, Dr. Vance, Eleanor Wright).",
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
+    console.error("Database migration error:", message);
     return {
       success: false,
       message,

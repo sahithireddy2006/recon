@@ -85,18 +85,19 @@ export default function ContestArenaPage({ params }: PageProps) {
     }, 600);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsRunningTests(true);
-    setTimeout(() => {
-      setIsRunningTests(false);
-      const res = submitContestCode(
+    try {
+      const res = await submitContestCode(
         contest.id,
         activeProblem.id,
         userCode,
         selectedLanguage
       );
       setSubmissionResult(res);
-    }, 1000);
+    } finally {
+      setIsRunningTests(false);
+    }
   };
 
   return (

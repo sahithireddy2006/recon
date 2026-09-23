@@ -101,6 +101,35 @@ export default function AdminPage() {
     department: "",
   });
 
+  // Fetch real users from Neon DB
+  const loadUsersFromDb = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.users && Array.isArray(data.users)) {
+          setUserList(
+            data.users.map((u: { id: string; name: string; email: string; role: string; department: string; status: string; semester: number }) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              role: u.role as "student" | "teacher" | "admin",
+              status: (u.status as "Active" | "Suspended") || "Active",
+              termOrDept: u.role === "student" ? `Semester ${u.semester} (${u.department})` : u.department,
+              lastLogin: "Active",
+            }))
+          );
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load users from DB:", e);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    loadUsersFromDb();
+  }, [loadUsersFromDb]);
+
   // Curriculum State
   const [isAddSubjectOpen, setIsAddSubjectOpen] = useState(false);
   const [newSubject, setNewSubject] = useState({
@@ -119,34 +148,44 @@ export default function AdminPage() {
     return matchesSearch && matchesRole;
   });
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUser.name || !newUser.email) return;
 
-    setUserList((prev) => [
-      ...prev,
-      {
-        id: `u_${Date.now()}`,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        status: "Active",
-        termOrDept: newUser.department || "General CS",
-        lastLogin: "Never",
-      },
-    ]);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser),
+      });
+      if (res.ok) {
+        await loadUsersFromDb();
+      }
+    } catch (e) {
+      console.error("Error creating user:", e);
+    }
+
     setIsAddUserOpen(false);
     setNewUser({ name: "", email: "", role: "student", department: "" });
   };
 
-  const toggleUserStatus = (id: string) => {
+  const toggleUserStatus = async (id: string) => {
+    const target = userList.find((u) => u.id === id);
+    const nextStatus = target?.status === "Active" ? "Suspended" : "Active";
+
     setUserList((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" }
-          : u
-      )
+      prev.map((u) => (u.id === id ? { ...u, status: nextStatus } : u))
     );
+
+    try {
+      await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: id, status: nextStatus }),
+      });
+    } catch (e) {
+      console.error("Error toggling user status in Neon DB:", e);
+    }
   };
 
   return (
