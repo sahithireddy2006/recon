@@ -20,12 +20,14 @@ import {
   Terminal,
   Activity,
 } from "lucide-react";
+import { useLMSStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export default function LandingPage() {
+  const { isAuthenticated, currentUser } = useLMSStore();
   const [activeStep, setActiveStep] = useState<number>(1);
   const [heroTestStatus, setHeroTestStatus] = useState<string>("Ready to test");
 
@@ -87,17 +89,34 @@ export default function LandingPage() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button variant="outline" size="sm">
-              Log In
-            </Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button variant="secondary" size="sm" className="font-black text-black">
-              <span>Enter LMS</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <div className="hidden sm:flex items-center border-2 border-[#282F40] bg-[#0D1017] px-2.5 py-1 font-mono text-xs">
+                <span className="text-[#8E95A5] text-[10px] uppercase mr-1.5">USER:</span>
+                <span className="text-[#FFE600] font-bold">@{currentUser.handle}</span>
+              </div>
+              <Link href="/dashboard">
+                <Button variant="secondary" size="sm" className="font-black text-black">
+                  <span>Enter LMS</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Log In
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="secondary" size="sm" className="font-black text-black">
+                  <span>Sign In</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -135,9 +154,9 @@ export default function LandingPage() {
 
           {/* Primary & Secondary CTAs */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-            <Link href="/dashboard">
+            <Link href={isAuthenticated ? "/dashboard" : "/login"}>
               <Button variant="primary" size="lg" className="w-full sm:w-auto text-white">
-                <span>Access Student & Faculty Portal</span>
+                <span>{isAuthenticated ? "Go to Your Dashboard" : "Access Student & Faculty Portal"}</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -149,11 +168,13 @@ export default function LandingPage() {
               </Button>
             </Link>
 
-            <Link href="/login">
-              <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                <span>Role Switcher & Sign In</span>
-              </Button>
-            </Link>
+            {!isAuthenticated && (
+              <Link href="/login">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                  <span>Sign In / Register</span>
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Interactive Hero Widget: Live LMS Experience Showcase */}
@@ -587,15 +608,15 @@ int main() {
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/login">
+            <Link href={isAuthenticated ? "/dashboard" : "/login"}>
               <Button variant="secondary" size="lg" className="text-black font-black">
-                <span>Sign In via Institutional Portal</span>
+                <span>{isAuthenticated ? "Enter LMS Dashboard" : "Sign In via Institutional Portal"}</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
-            <Link href="/dashboard">
+            <Link href={isAuthenticated ? "/contests" : "/login"}>
               <Button variant="white" size="lg" className="text-black font-bold">
-                Launch Direct Demo Session
+                {isAuthenticated ? "Go to Live Contest Arena" : "1-Click Demo Profiles"}
               </Button>
             </Link>
           </div>

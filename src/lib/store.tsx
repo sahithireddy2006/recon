@@ -18,7 +18,8 @@ import {
 interface LMSStoreContextType {
   currentUser: User;
   currentRole: UserRole;
-  setRole: (role: UserRole) => Promise<void>;
+  isAuthenticated: boolean;
+  isLoadingSession: boolean;
   login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (data: {
     name: string;
@@ -61,6 +62,8 @@ const LMSStoreContext = createContext<LMSStoreContextType | undefined>(undefined
 export function LMSProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS.student);
   const [currentRole, setCurrentRole] = useState<UserRole>("student");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
   const [selectedSemester, setSelectedSemester] = useState<number>(4);
   const [subjects, setSubjects] = useState<Subject[]>(MOCK_SUBJECTS);
   const [contests, setContests] = useState<Contest[]>(MOCK_CONTESTS);
@@ -74,12 +77,16 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
   const syncFromSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
-      if (!res.ok) return;
+      if (!res.ok) {
+        setIsAuthenticated(false);
+        return;
+      }
       const data = await res.json();
       if (data.authenticated && data.user) {
         setCurrentUser(data.user);
         setCurrentRole(data.user.role);
         setSelectedSemester(data.user.semester || 4);
+        setIsAuthenticated(true);
 
         // Merge DB-persisted completed lessons
         if (data.completedLessons && Array.isArray(data.completedLessons)) {
@@ -123,9 +130,14 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
             }))
           );
         }
+      } else {
+        setIsAuthenticated(false);
       }
     } catch (e) {
       console.warn("Could not sync session with Neon DB, using local store:", e);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoadingSession(false);
     }
   }, []);
 
@@ -195,24 +207,6 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
     setCurrentUser(MOCK_USERS.student);
     if (typeof window !== "undefined") {
       window.location.href = "/login";
-    }
-  };
-
-  // Role switcher (switches active demo persona in DB)
-  const setRole = async (role: UserRole) => {
-    setCurrentRole(role);
-    const target = MOCK_USERS[role] || MOCK_USERS.student;
-    setCurrentUser(target);
-    // Authenticate via DB
-    try {
-      await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: target.email, password: "password123" }),
-      });
-      await syncFromSession();
-    } catch (e) {
-      // ignore
     }
   };
 
@@ -393,7 +387,8 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
       value={{
         currentUser,
         currentRole,
-        setRole,
+        isAuthenticated,
+        isLoadingSession,
         login,
         register,
         logout,

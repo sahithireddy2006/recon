@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   BookOpen,
@@ -20,9 +20,10 @@ import {
   Flame,
   ChevronRight,
   Sparkles,
+  LogOut,
+  ShieldAlert,
 } from "lucide-react";
 import { useLMSStore } from "@/lib/store";
-import { RoleSwitcher } from "@/components/ui/role-switcher";
 import { GlobalSearchModal } from "@/components/ui/global-search";
 import { NotificationDrawer } from "@/components/ui/notification-drawer";
 import { formatRating, cn } from "@/lib/utils";
@@ -33,10 +34,13 @@ export default function PlatformLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const {
     currentUser,
     currentRole,
-    setRole,
+    isAuthenticated,
+    isLoadingSession,
+    logout,
     setIsSearchOpen,
     setIsNotificationDrawerOpen,
     unreadNotificationsCount,
@@ -47,8 +51,16 @@ export default function PlatformLayout({
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const ratingInfo = formatRating(currentUser.rating);
+  // Authentication Guard: if not authenticated, redirect to /login
+  useEffect(() => {
+    if (!isLoadingSession && !isAuthenticated) {
+      router.push("/login");
+    }
+  }, [isLoadingSession, isAuthenticated, router]);
 
+  const ratingInfo = formatRating(currentUser?.rating || 1200);
+
+  // Only show Admin Panel if user actually holds 'admin' role
   const navItems = [
     {
       label: "Dashboard",
@@ -87,14 +99,42 @@ export default function PlatformLayout({
       icon: Settings,
       badge: null,
     },
-    {
-      label: "Admin Panel",
-      href: "/admin",
-      icon: ShieldCheck,
-      badge: "ADMIN",
-      badgeColor: "bg-[#FF5C58] text-white",
-    },
+    ...(currentUser?.role === "admin"
+      ? [
+          {
+            label: "Admin Panel",
+            href: "/admin",
+            icon: ShieldCheck,
+            badge: "ADMIN",
+            badgeColor: "bg-[#FF5C58] text-white",
+          },
+        ]
+      : []),
   ];
+
+  // Loading state while checking session
+  if (isLoadingSession) {
+    return (
+      <div className="min-h-screen bg-[#0B0D10] flex items-center justify-center p-6 text-white font-mono text-xs">
+        <div className="p-8 bg-[#12151D] border-2 border-white brutal-shadow-white space-y-4 max-w-sm text-center">
+          <div className="w-10 h-10 bg-[#FF5C58] text-black border-2 border-black mx-auto flex items-center justify-center font-display font-black text-xl">
+            R
+          </div>
+          <div className="font-display font-black uppercase text-base text-white tracking-wider">
+            AUTHENTICATING SESSION...
+          </div>
+          <p className="text-[#8E95A5] text-xs">
+            Verifying institutional credentials with Neon PostgreSQL.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in: blocked from viewing platform
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0D10] text-[#EDEDED]">
@@ -125,7 +165,7 @@ export default function PlatformLayout({
           </Link>
         </div>
 
-        {/* Center: Search trigger & Role Switcher */}
+        {/* Center: Search trigger & Verified User Role Badge (Read-Only) */}
         <div className="flex items-center gap-2 lg:gap-4">
           <button
             onClick={() => setIsSearchOpen(true)}
@@ -138,10 +178,28 @@ export default function PlatformLayout({
             </kbd>
           </button>
 
-          <RoleSwitcher />
+          {/* Authentic Role Status Badge */}
+          <div className="flex items-center border-2 border-[#282F40] bg-[#0D1017] px-3 py-1.5 font-mono text-xs select-none">
+            <span className="text-[#8E95A5] uppercase text-[10px] mr-2">ROLE:</span>
+            <span
+              className={cn(
+                "px-2 py-0.5 font-bold uppercase text-[10px] border border-black",
+                currentUser.role === "admin"
+                  ? "bg-[#FF5C58] text-white"
+                  : currentUser.role === "teacher"
+                  ? "bg-[#2D7FF9] text-white"
+                  : "bg-[#FFE600] text-black"
+              )}
+            >
+              {currentUser.role === "teacher" ? "FACULTY" : currentUser.role.toUpperCase()}
+            </span>
+            <span className="text-[#FFE600] text-[11px] font-bold ml-2 hidden sm:inline">
+              @{currentUser.handle}
+            </span>
+          </div>
         </div>
 
-        {/* Right: Actions, Notifications, User */}
+        {/* Right: Actions, Notifications, User Profile & Log Out */}
         <div className="flex items-center gap-2">
           {/* Notification Button */}
           <button
@@ -176,7 +234,6 @@ export default function PlatformLayout({
             className="flex items-center gap-2 pl-2 border-l border-[#282F40] hover:opacity-90"
           >
             <div className="w-8 h-8 border-2 border-black overflow-hidden bg-[#2D7FF9] shrink-0 brutal-shadow-sm">
-              {/* Avatar image with fallback */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={currentUser.avatar}
@@ -193,6 +250,16 @@ export default function PlatformLayout({
               </span>
             </div>
           </Link>
+
+          {/* Explicit Sign Out Button */}
+          <button
+            onClick={logout}
+            className="px-2.5 py-1.5 bg-[#0B0D10] border-2 border-[#282F40] hover:border-[#FF5C58] hover:text-[#FF5C58] text-[#8E95A5] transition-colors font-mono text-xs uppercase font-bold flex items-center gap-1.5 brutal-btn ml-1"
+            title="Sign out of your account"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Sign Out</span>
+          </button>
         </div>
       </header>
 
@@ -204,8 +271,8 @@ export default function PlatformLayout({
             {/* Academic Status Card */}
             <div className="p-3 bg-[#0B0D10] border-2 border-[#282F40]">
               <div className="flex items-center justify-between font-mono text-[10px] text-[#8E95A5] uppercase">
-                <span>Academic Status</span>
-                <span className="text-[#00E599] font-bold">ACTIVE</span>
+                <span>Account Status</span>
+                <span className="text-[#00E599] font-bold">VERIFIED</span>
               </div>
               <div className="mt-1 font-display font-bold text-sm text-white">
                 {currentUser.department}
@@ -223,18 +290,11 @@ export default function PlatformLayout({
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                const isAdminItem = item.href === "/admin";
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => {
-                      if (isAdminItem && currentRole !== "admin") {
-                        // Helpful preview behavior: if clicked admin link, switch to admin persona
-                        setRole("admin");
-                      }
-                    }}
                     className={cn(
                       "flex items-center justify-between px-3 py-2.5 font-display font-bold text-xs uppercase tracking-wide border-2 transition-all",
                       isActive

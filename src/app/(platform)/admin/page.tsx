@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   ShieldCheck,
   Users,
@@ -86,7 +87,7 @@ const INITIAL_USERS: ManagedUser[] = [
 ];
 
 export default function AdminPage() {
-  const { subjects, contests, currentRole, setRole } = useLMSStore();
+  const { subjects, contests, currentUser } = useLMSStore();
   const [activeTab, setActiveTab] = useState<"users" | "curriculum" | "contests" | "logs">("users");
 
   // Users State
@@ -188,27 +189,40 @@ export default function AdminPage() {
     }
   };
 
+  // Strictly enforce Admin clearance
+  if (currentUser?.role !== "admin") {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-[#12151D] border-4 border-[#FF5C58] brutal-shadow p-8 text-center space-y-5">
+          <div className="w-14 h-14 bg-[#FF5C58] text-white mx-auto flex items-center justify-center border-2 border-black">
+            <Lock className="w-7 h-7 text-black" />
+          </div>
+          <div className="space-y-1">
+            <span className="px-2.5 py-0.5 bg-[#FF5C58] text-black font-mono text-[10px] font-bold uppercase tracking-wider">
+              HTTP 403 · ACCESS DENIED
+            </span>
+            <h1 className="font-display font-black text-2xl text-white uppercase tracking-tight">
+              Administrative Clearance Required
+            </h1>
+          </div>
+          <p className="font-mono text-xs text-[#8E95A5] leading-relaxed">
+            Your authenticated account (<span className="text-white">@{currentUser?.handle || "anonymous"}</span>) holds the institutional role of{" "}
+            <span className="text-[#FFE600] font-bold uppercase">{currentUser?.role || "unauthorized"}</span>. The administration and governance console is strictly restricted to platform administrators.
+          </p>
+          <div className="pt-2">
+            <Link href="/dashboard" className="block w-full">
+              <Button variant="primary" size="md" className="w-full text-white">
+                Return to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Admin Notice Banner if not logged as admin */}
-      {currentRole !== "admin" && (
-        <div className="p-4 bg-[#FF5C58] text-white border-2 border-black brutal-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Lock className="w-5 h-5 text-black" />
-            <span className="font-mono text-xs font-bold uppercase text-black">
-              ADMINISTRATIVE CONTROL PANEL · SWITCH TO ADMIN PERSONA TO ENABLE EDIT ACTIONS
-            </span>
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setRole("admin")}
-            className="text-black"
-          >
-            Switch to Admin Persona
-          </Button>
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b-2 border-[#282F40]">
