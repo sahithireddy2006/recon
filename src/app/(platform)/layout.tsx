@@ -265,9 +265,9 @@ export default function PlatformLayout({
 
       {/* Main Container */}
       <div className="flex-1 flex w-full">
-        {/* Left Desktop Sidebar */}
-        <aside className="hidden lg:flex w-64 flex-col bg-[#12151D] border-r-2 border-[#282F40] justify-between p-4 shrink-0">
-          <div className="space-y-6">
+        {/* Left Desktop Sidebar - Sticky and locked to viewport height so bottom widgets remain permanently visible */}
+        <aside className="hidden lg:flex w-64 flex-col bg-[#12151D] border-r-2 border-[#282F40] p-4 shrink-0 sticky top-16 h-[calc(100vh-4rem)] z-30 justify-between">
+          <div className="space-y-4 overflow-y-auto overflow-x-hidden flex-1 min-h-0 pr-1">
             {/* Academic Status Card */}
             <div className="p-3 bg-[#0B0D10] border-2 border-[#282F40]">
               <div className="flex items-center justify-between font-mono text-[10px] text-[#8E95A5] uppercase">
@@ -322,12 +322,12 @@ export default function PlatformLayout({
             </nav>
           </div>
 
-          {/* Bottom Sidebar Widgets */}
-          <div className="space-y-3 pt-4 border-t-2 border-[#282F40]">
+          {/* Bottom Sidebar Widgets - Permanently anchored to bottom-left */}
+          <div className="space-y-2.5 pt-3 border-t-2 border-[#282F40] shrink-0 mt-3">
             {/* Daily Streak Flame */}
-            <div className="p-3 bg-[#1A1F2B] border-2 border-[#282F40] flex items-center justify-between">
+            <div className="p-2.5 bg-[#1A1F2B] border-2 border-[#282F40] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 bg-[#FF5C58] border border-black flex items-center justify-center text-white">
+                <div className="w-8 h-8 bg-[#FF5C58] border border-black flex items-center justify-center text-white shrink-0">
                   <Flame className="w-5 h-5 fill-white" />
                 </div>
                 <div>
@@ -343,7 +343,7 @@ export default function PlatformLayout({
             </div>
 
             {/* Contest Rating Widget */}
-            <div className="p-3 bg-[#0B0D10] border-2 border-[#282F40]">
+            <div className="p-2.5 bg-[#0B0D10] border-2 border-[#282F40]">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase text-[#8E95A5]">
                 <span>Contest Rating</span>
                 <span className={cn("font-bold", ratingInfo.colorClass)}>
@@ -358,7 +358,7 @@ export default function PlatformLayout({
                   Peak: {currentUser.maxRating}
                 </span>
               </div>
-              <div className="mt-2 text-[10px] font-mono text-[#00E599] flex items-center gap-1">
+              <div className="mt-1 text-[10px] font-mono text-[#00E599] flex items-center gap-1">
                 <span>Top #{currentUser.bestRank} rank</span>
                 <span>·</span>
                 <span>{currentUser.solvedCount} Solved</span>
