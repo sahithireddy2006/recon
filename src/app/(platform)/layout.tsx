@@ -165,14 +165,25 @@ export default function PlatformLayout({
           </Link>
         </div>
 
-        {/* Center: Quick Search Trigger */}
-        <div className="flex items-center">
+        {/* Center: Prominent Neo-Brutalist Global Search Bar */}
+        <div className="flex-1 max-w-[200px] sm:max-w-md lg:max-w-xl mx-2 sm:mx-6 flex items-center">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-2 px-3.5 py-1.5 bg-[#0B0D10] border-2 border-[#282F40] hover:border-white text-[#8E95A5] hover:text-white transition-all text-xs font-mono select-none brutal-btn"
+            className="w-full h-10 bg-[#0B0D10] border-2 border-[#FFE600] shadow-[3px_3px_0px_#000000] hover:shadow-[3px_3px_0px_#FFE600] hover:border-white flex items-center justify-between px-2.5 sm:px-3 text-xs font-mono transition-all group select-none brutal-btn"
+            title="Search LMS Curriculum, Contests, Lessons & Code"
           >
-            <Search className="w-3.5 h-3.5 text-[#FFE600]" />
-            <span>Quick Search...</span>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-6 h-6 bg-[#FFE600] text-black border border-black flex items-center justify-center shrink-0 group-hover:bg-[#FF5C58] group-hover:text-white transition-colors">
+                <Search className="w-3.5 h-3.5 stroke-[2.5]" />
+              </div>
+              <span className="text-white font-bold tracking-wide uppercase text-[11px] sm:text-xs truncate">
+                <span className="hidden sm:inline">Search Courses, Contests, Lessons & Topics...</span>
+                <span className="sm:hidden">Search LMS...</span>
+              </span>
+            </div>
+            <span className="hidden lg:inline-flex items-center px-1.5 py-0.5 bg-[#1A1F2B] border border-[#FFE600] text-[9px] text-[#FFE600] font-bold uppercase tracking-widest shrink-0 ml-2">
+              GLOBAL
+            </span>
           </button>
         </div>
 
