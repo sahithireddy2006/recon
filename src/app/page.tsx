@@ -85,25 +85,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Center Nav Links */}
-        <nav className="hidden md:flex items-center gap-6 font-mono text-xs uppercase tracking-wider text-[#9DA7BC]">
-          <a href="#overview" className="hover:text-white transition-colors">
-            Capabilities
-          </a>
-          <a href="#curriculum" className="hover:text-white transition-colors">
-            Curriculum
-          </a>
-          <a href="#contests" className="hover:text-white transition-colors">
-            Contests
-          </a>
-          <a href="#analytics" className="hover:text-white transition-colors">
-            Analytics
-          </a>
-          <a href="#roles" className="hover:text-white transition-colors">
-            Roles
-          </a>
-        </nav>
-
         {/* Actions */}
         <div className="flex items-center gap-3">
           <Link href="/login">
