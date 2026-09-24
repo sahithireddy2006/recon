@@ -165,38 +165,15 @@ export default function PlatformLayout({
           </Link>
         </div>
 
-        {/* Center: Search trigger & Verified User Role Badge (Read-Only) */}
-        <div className="flex items-center gap-2 lg:gap-4">
+        {/* Center: Quick Search Trigger */}
+        <div className="flex items-center">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 bg-[#0B0D10] border-2 border-[#282F40] hover:border-white text-[#8E95A5] hover:text-white transition-all text-xs font-mono select-none"
+            className="flex items-center gap-2 px-3.5 py-1.5 bg-[#0B0D10] border-2 border-[#282F40] hover:border-white text-[#8E95A5] hover:text-white transition-all text-xs font-mono select-none brutal-btn"
           >
             <Search className="w-3.5 h-3.5 text-[#FFE600]" />
-            <span className="hidden md:inline">Quick Search...</span>
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 bg-[#1A1F2B] border border-[#384156] text-[10px] text-[#DCE2EE]">
-              Ctrl+K
-            </kbd>
+            <span>Quick Search...</span>
           </button>
-
-          {/* Authentic Role Status Badge */}
-          <div className="flex items-center border-2 border-[#282F40] bg-[#0D1017] px-3 py-1.5 font-mono text-xs select-none">
-            <span className="text-[#8E95A5] uppercase text-[10px] mr-2">ROLE:</span>
-            <span
-              className={cn(
-                "px-2 py-0.5 font-bold uppercase text-[10px] border border-black",
-                currentUser.role === "admin"
-                  ? "bg-[#FF5C58] text-white"
-                  : currentUser.role === "teacher"
-                  ? "bg-[#2D7FF9] text-white"
-                  : "bg-[#FFE600] text-black"
-              )}
-            >
-              {currentUser.role === "teacher" ? "FACULTY" : currentUser.role.toUpperCase()}
-            </span>
-            <span className="text-[#FFE600] text-[11px] font-bold ml-2 hidden sm:inline">
-              @{currentUser.handle}
-            </span>
-          </div>
         </div>
 
         {/* Right: Actions, Notifications, User Profile & Log Out */}
