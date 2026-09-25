@@ -139,7 +139,7 @@ export default function SubjectWorkspacePage({ params }: PageProps) {
               </div>
               {isTeacherOrAdmin && (
                 <div className="mt-2 pt-2 border-t border-[#282F40] text-[10px] text-[#2D7FF9] font-bold">
-                  ✓ FACULTY EDIT ACCESS ENABLED
+                  ✓ INSTRUCTOR EDIT ACCESS ENABLED
                 </div>
               )}
             </div>
@@ -293,7 +293,7 @@ export default function SubjectWorkspacePage({ params }: PageProps) {
               Downloadable Academic Materials & Formulae
             </h2>
             <span className="font-mono text-xs text-[#8E95A5]">
-              Verified by Department Faculty
+              Verified by Course Instructor
             </span>
           </div>
 
@@ -373,7 +373,7 @@ export default function SubjectWorkspacePage({ params }: PageProps) {
                       <span>Duration: <strong className="text-white">{test.durationMinutes} mins</strong></span>
                       <span>Questions: <strong className="text-white">{test.questions.length} MCQs</strong></span>
                       <span>Passing Threshold: <strong className="text-white">{test.passingScore}%</strong></span>
-                      <span>Attempts: <strong className="text-white">{isTeacherOrAdmin ? "Unlimited (Faculty)" : `${test.maxAttempts} max`}</strong></span>
+                      <span>Attempts: <strong className="text-white">{isTeacherOrAdmin ? "Unlimited (Instructor)" : `${test.maxAttempts} max`}</strong></span>
                     </div>
                   </div>
 

@@ -56,7 +56,7 @@ export default function LandingPage() {
     {
       step: 4,
       name: "Study Materials",
-      detail: "Faculty notes, formula guides, cheat sheets",
+      detail: "Instructor notes, formula guides, cheat sheets",
       code: "DOCS",
       highlight: "Graph Flow Spec & Complexity Green Sheets",
     },
@@ -156,7 +156,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
             <Link href={isAuthenticated ? "/dashboard" : "/login"}>
               <Button variant="primary" size="lg" className="w-full sm:w-auto text-white">
-                <span>{isAuthenticated ? "Go to Your Dashboard" : "Access Student & Faculty Portal"}</span>
+                <span>{isAuthenticated ? "Go to Your Dashboard" : "Access Student & Instructor Portal"}</span>
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -284,7 +284,7 @@ int main() {
                   Academic Learning
                 </h3>
                 <p className="font-mono text-xs text-black/90 leading-relaxed font-medium">
-                  Semester-based academic hierarchy from Semester 1 to 8. Complete with module breakdown, faculty notes, downloadable cheat sheets, and verified code implementations.
+                  Semester-based academic hierarchy from Semester 1 to 8. Complete with module breakdown, instructor notes, downloadable cheat sheets, and verified code implementations.
                 </p>
               </div>
               <div className="font-mono text-xs text-black font-bold uppercase tracking-wider border-t border-black/30 pt-3 flex items-center justify-between">
@@ -426,7 +426,7 @@ int main() {
             </div>
 
             <p className="font-mono text-xs text-[#DCE2EE] leading-relaxed">
-              {academicSteps[activeStep - 1].detail}. Students unlock curriculum modules progressively by passing previous quizzes, while faculty instructors have instantaneous review access across all 8 terms.
+              {academicSteps[activeStep - 1].detail}. Students unlock curriculum modules progressively by passing previous quizzes, while instructors have instantaneous review access across all 8 terms.
             </p>
           </div>
         </div>
@@ -517,7 +517,7 @@ int main() {
               ROLE ARCHITECTURE
             </span>
             <h2 className="font-display font-black text-3xl sm:text-4xl uppercase tracking-tight text-white">
-              Tailored for Students, Teachers & Administrators
+              Tailored for Students, Instructors & Administrators
             </h2>
             <p className="font-mono text-xs text-[#8E95A5]">
               Shared visual DNA with strictly separated permission tiers and purpose-built toolsets.
@@ -547,10 +547,10 @@ int main() {
               </Link>
             </div>
 
-            {/* Teacher Role */}
+            {/* Instructor Role */}
             <div className="p-6 bg-[#12151D] border-2 border-[#282F40] space-y-4">
               <div className="flex items-center justify-between">
-                <Badge variant="blue" size="sm">FACULTY EXPERIENCE</Badge>
+                <Badge variant="blue" size="sm">INSTRUCTOR EXPERIENCE</Badge>
                 <BookOpen className="w-5 h-5 text-[#2D7FF9]" />
               </div>
               <h3 className="font-display font-black text-xl uppercase text-white">
@@ -564,7 +564,7 @@ int main() {
               </ul>
               <Link href="/dashboard" className="block pt-2">
                 <Button variant="outline" size="sm" className="w-full">
-                  Explore Teacher View
+                  Explore Instructor View
                 </Button>
               </Link>
             </div>

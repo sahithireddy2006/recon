@@ -269,7 +269,7 @@ export default function AdminPage() {
 
         <Card variant="dark" hasShadow className="p-4">
           <div className="flex items-center justify-between text-[#8E95A5] font-mono text-[10px] uppercase">
-            <span>Faculty & Teachers</span>
+            <span>Instructors</span>
             <ShieldCheck className="w-4 h-4 text-[#2D7FF9]" />
           </div>
           <div className="mt-2 font-display font-black text-2xl text-white">
@@ -615,7 +615,7 @@ export default function AdminPage() {
         isOpen={isAddUserOpen}
         onClose={() => setIsAddUserOpen(false)}
         title="Provision New Platform User"
-        description="Creates an authorized account for faculty or student"
+        description="Creates an authorized account for instructor or student"
         maxWidth="md"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
@@ -665,7 +665,7 @@ export default function AdminPage() {
                     : "bg-[#0B0D10] text-[#8E95A5] border-[#282F40]"
                 )}
               >
-                Teacher / Faculty
+                Teacher / Instructor
               </button>
             </div>
           </div>

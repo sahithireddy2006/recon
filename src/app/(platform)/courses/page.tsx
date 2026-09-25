@@ -45,7 +45,7 @@ export default function CoursesPage() {
           <div className="flex items-center gap-2">
             <Badge variant="coral" size="sm">ACADEMIC CURRICULUM</Badge>
             <span className="font-mono text-xs text-[#8E95A5]">
-              {isTeacherOrAdmin ? "All Semesters Unlocked (Faculty Mode)" : "Semester 4 Enrolled Courses"}
+              {isTeacherOrAdmin ? "All Semesters Unlocked (Instructor Mode)" : "Semester 4 Enrolled Courses"}
             </span>
           </div>
           <h1 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-white mt-1">
@@ -68,7 +68,7 @@ export default function CoursesPage() {
           <div className="flex items-center gap-2 font-bold uppercase">
             {isTeacherOrAdmin ? <Unlock className="w-4 h-4" /> : <GraduationCap className="w-4 h-4" />}
             <span>
-              {isTeacherOrAdmin ? "Faculty Access Active" : "Student Progression Mode"}
+              {isTeacherOrAdmin ? "Instructor Access Active" : "Student Progression Mode"}
             </span>
           </div>
           <p className="text-[11px] text-white/80 mt-1">

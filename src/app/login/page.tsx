@@ -135,7 +135,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="font-mono text-xs text-[#9DA7BC] leading-relaxed">
-              Every student and faculty member possesses a unique identity and verified academic record, synchronized directly with live Neon PostgreSQL.
+              Every student and instructor possesses a unique identity and verified academic record, synchronized directly with live Neon PostgreSQL.
             </p>
           </div>
 
@@ -387,7 +387,7 @@ export default function LoginPage() {
                   handleDemoSignIn("marcus.vance@faculty.recon.edu", "password123", "/dashboard")
                 }
                 className="p-2 bg-[#2D7FF9] text-white border border-black font-bold uppercase hover:opacity-90 brutal-btn truncate"
-                title="Prof. Marcus Vance (Faculty)"
+                title="Prof. Marcus Vance (Instructor)"
               >
                 Prof. Vance
               </button>
