@@ -10,10 +10,10 @@ import {
 export const MOCK_USERS: Record<string, User> = {
   student: {
     id: "usr_student_01",
-    name: "Alex Chen",
-    handle: "alex_chen",
+    name: "Sahana",
+    handle: "sahana",
     role: "student",
-    email: "alex.chen@student.recon.edu",
+    email: "sahana@student.recon.edu",
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     bio: "CS Undergraduate @ RECON. Systems programmer, competitive coder, algorithm enthusiast. Aiming for Grandmaster.",
     rating: 1742,
@@ -719,7 +719,7 @@ int main() {
       {
         rank: 14,
         userId: "usr_student_01",
-        handle: "alex_chen",
+        handle: "sahana",
         rating: 1742,
         solvedCount: 1,
         penaltyTime: 16,

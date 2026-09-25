@@ -41,8 +41,8 @@ interface ManagedUser {
 const INITIAL_USERS: ManagedUser[] = [
   {
     id: "u_1",
-    name: "Alex Chen",
-    email: "alex.chen@student.recon.edu",
+    name: "Sahana",
+    email: "sahana@student.recon.edu",
     role: "student",
     status: "Active",
     termOrDept: "Semester 4 (CS)",
@@ -592,10 +592,10 @@ export default function AdminPage() {
 
           <div className="p-4 bg-[#090B0F] border-2 border-[#282F40] font-mono text-xs space-y-2 text-[#8E95A5] max-h-96 overflow-y-auto">
             <div className="text-white">
-              <span className="text-[#00E599]">[15:42:01 UTC]</span> Judge node #3: Accepted solution for task w48_prob_a by alex_chen (0.04s, 12MB).
+              <span className="text-[#00E599]">[15:42:01 UTC]</span> Judge node #3: Accepted solution for task w48_prob_a by sahana (0.04s, 12MB).
             </div>
             <div>
-              <span className="text-[#FFE600]">[15:39:24 UTC]</span> Auth server: User alex_chen initialized Google OAuth single sign-on session.
+              <span className="text-[#FFE600]">[15:39:24 UTC]</span> Auth server: User sahana initialized Google OAuth single sign-on session.
             </div>
             <div>
               <span className="text-[#2D7FF9]">[15:30:12 UTC]</span> Assessment engine: Graded CS203 Mid-Term exam for 48 enrolled candidates.

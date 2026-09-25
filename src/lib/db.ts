@@ -111,15 +111,15 @@ export async function initializeDatabaseSchema(): Promise<{
     // 5. Seed default demo accounts with hashed passwords if missing
     const defaultPasswordHash = bcrypt.hashSync("password123", 10);
 
-    // Student Alex Chen
+    // Student Sahana
     await sql`
       INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
       VALUES (
         'usr_student_01',
-        'Alex Chen',
-        'alex_chen',
+        'Sahana',
+        'sahana',
         'student',
-        'alex.chen@student.recon.edu',
+        'sahana@student.recon.edu',
         ${defaultPasswordHash},
         'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
         'CS Undergraduate @ RECON. Systems programmer, competitive coder, algorithm enthusiast. Aiming for Grandmaster.',
@@ -133,6 +133,9 @@ export async function initializeDatabaseSchema(): Promise<{
         'Active'
       )
       ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        handle = EXCLUDED.handle,
+        email = EXCLUDED.email,
         password_hash = EXCLUDED.password_hash,
         rating = EXCLUDED.rating;
     `;
@@ -203,7 +206,7 @@ export async function initializeDatabaseSchema(): Promise<{
     return {
       success: true,
       message:
-        "Neon DB initialized with tables, columns, indexes, and pre-seeded unique accounts (Alex Chen, Dr. Vance, Eleanor Wright).",
+        "Neon DB initialized with tables, columns, indexes, and pre-seeded unique accounts (Sahana, Dr. Vance, Eleanor Wright).",
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

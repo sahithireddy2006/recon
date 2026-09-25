@@ -229,7 +229,7 @@ int main() {
                     Live Leaderboard Standing
                   </div>
                   <div className="font-display font-black text-2xl uppercase">
-                    Alex Chen · Rank #14
+                    Sahana · Rank #14
                   </div>
                   <div className="font-mono text-xs text-black/80 font-bold">
                     Rating: 1742 (Expert) · 18-Day Streak 🔥
@@ -497,7 +497,7 @@ int main() {
                   </tr>
                   <tr className="bg-[#FFE600]/10 border-l-4 border-l-[#FFE600]">
                     <td className="py-2.5 px-3 font-bold text-white">#14</td>
-                    <td className="py-2.5 px-3 font-bold text-[#2D7FF9]">alex_chen (You)</td>
+                    <td className="py-2.5 px-3 font-bold text-[#2D7FF9]">sahana (You)</td>
                     <td className="py-2.5 px-3 text-[#2D7FF9] font-bold">1742 Expert</td>
                     <td className="py-2.5 px-3 text-center text-[#00E599] font-bold">1 / 4</td>
                     <td className="py-2.5 px-3 text-right text-[#8E95A5]">16 min</td>

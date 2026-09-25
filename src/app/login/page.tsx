@@ -31,7 +31,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // Login Form
-  const [loginIdentifier, setLoginIdentifier] = useState("alex.chen@student.recon.edu");
+  const [loginIdentifier, setLoginIdentifier] = useState("sahana@student.recon.edu");
   const [loginPassword, setLoginPassword] = useState("password123");
 
   // Registration Form (Unique Student)
@@ -226,7 +226,7 @@ export default function LoginPage() {
                 </label>
                 <Input
                   type="text"
-                  placeholder="e.g. alex_chen or alex.chen@student.recon.edu"
+                  placeholder="e.g. sahana or sahana@student.recon.edu"
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
                   required
@@ -374,12 +374,12 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() =>
-                  handleDemoSignIn("alex.chen@student.recon.edu", "password123", "/dashboard")
+                  handleDemoSignIn("sahana@student.recon.edu", "password123", "/dashboard")
                 }
                 className="p-2 bg-[#FFE600] text-black border border-black font-bold uppercase hover:opacity-90 brutal-btn truncate"
-                title="Student Alex Chen (Rating 1742 Expert)"
+                title="Student Sahana (Rating 1742 Expert)"
               >
-                Student Alex
+                Student Sahana
               </button>
               <button
                 type="button"
