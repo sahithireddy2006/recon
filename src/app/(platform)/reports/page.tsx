@@ -54,8 +54,10 @@ export default function ReportsPage() {
 
         <div className="p-3 bg-[#12151D] border-2 border-[#282F40] font-mono text-xs flex items-center gap-4">
           <div>
-            <div className="text-[10px] text-[#8E95A5] uppercase">Overall Score</div>
-            <div className="font-display font-black text-xl text-[#00E599]">91.4%</div>
+            <div className="text-[10px] text-[#8E95A5] uppercase">Syllabus Completion</div>
+            <div className="font-display font-black text-xl text-[#00E599]">
+              {totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0}%
+            </div>
           </div>
           <div className="pl-4 border-l border-[#282F40]">
             <div className="text-[10px] text-[#8E95A5] uppercase">Streak Consistency</div>
@@ -79,20 +81,20 @@ export default function ReportsPage() {
             <span className="font-mono text-xs text-[#8E95A5]">/ {totalLessons}</span>
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#2D7FF9]">
-            {Math.round((completedLessons / totalLessons) * 100)}% Syllabus Progress
+            {totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0}% Syllabus Progress
           </div>
         </Card>
 
         <Card variant="dark" hasShadow className="p-4">
           <div className="flex items-center justify-between text-[#8E95A5] font-mono text-[10px] uppercase">
-            <span>Assessment Avg</span>
+            <span>Assessment Status</span>
             <Award className="w-4 h-4 text-[#FFE600]" />
           </div>
           <div className="mt-2 flex items-baseline gap-1.5 font-display font-black text-2xl text-white">
-            <span>89.2%</span>
+            <span>{completedLessons > 0 ? `${currentUser.accuracy}%` : "In Progress"}</span>
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#00E599]">
-            Grade Tier: Superior (A)
+            {completedLessons > 0 ? "Academic Standing: Active" : "Pending assessments"}
           </div>
         </Card>
 
@@ -108,7 +110,7 @@ export default function ReportsPage() {
             </span>
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#8E95A5]">
-            Best Rank: #{currentUser.bestRank}
+            Best Rank: #{currentUser.bestRank || "—"}
           </div>
         </Card>
 
@@ -122,7 +124,7 @@ export default function ReportsPage() {
             <span className="font-mono text-xs text-[#8E95A5]">TASKS</span>
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#FFE600]">
-            Accuracy: 91.4%
+            Accuracy: {currentUser.accuracy}%
           </div>
         </Card>
       </div>

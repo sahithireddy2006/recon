@@ -108,39 +108,39 @@ export async function initializeDatabaseSchema(): Promise<{
       );
     `;
 
-    // 5. Seed default demo accounts with hashed passwords if missing
-    const defaultPasswordHash = bcrypt.hashSync("password123", 10);
+    // 5. Seed default institutional accounts (System Admin & Faculty Lead) with hashed passwords
+    const adminPasswordHash = bcrypt.hashSync("admin123", 10);
+    const facultyPasswordHash = bcrypt.hashSync("faculty123", 10);
 
-    // Student Sahana
+    // Platform Administrator
     await sql`
       INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
       VALUES (
-        'usr_student_01',
-        'Sahana',
-        'sahana',
-        'student',
-        'sahana@student.recon.edu',
-        ${defaultPasswordHash},
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        'CS Undergraduate @ RECON. Systems programmer, competitive coder, algorithm enthusiast. Aiming for Grandmaster.',
-        1742,
-        1810,
-        18,
-        142,
-        true,
+        'usr_admin_01',
+        'System Administrator',
+        'admin',
+        'admin',
+        'admin@recon.edu',
+        ${adminPasswordHash},
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+        'Platform Administrator & Chief Academic Director. Managing academic infrastructure, student quotas, faculty assignments, and contest governance.',
+        2000,
+        2050,
+        45,
+        310,
+        false,
         4,
-        'Computer Science & Engineering',
+        'Academic Operations',
         'Active'
       )
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
         handle = EXCLUDED.handle,
         email = EXCLUDED.email,
-        password_hash = EXCLUDED.password_hash,
-        rating = EXCLUDED.rating;
+        password_hash = EXCLUDED.password_hash;
     `;
 
-    // Teacher Dr. Marcus Vance
+    // Lead Faculty Professor: Dr. Marcus Vance
     await sql`
       INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
       VALUES (
@@ -149,7 +149,7 @@ export async function initializeDatabaseSchema(): Promise<{
         'prof_vance',
         'teacher',
         'marcus.vance@faculty.recon.edu',
-        ${defaultPasswordHash},
+        ${facultyPasswordHash},
         'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
         'Associate Professor of Computer Science. Research in Distributed Systems, High-Performance Query Engines, and OS Kernels.',
         2315,
@@ -162,52 +162,18 @@ export async function initializeDatabaseSchema(): Promise<{
         'Active'
       )
       ON CONFLICT (id) DO UPDATE SET
+        name = EXCLUDED.name,
+        handle = EXCLUDED.handle,
+        email = EXCLUDED.email,
         password_hash = EXCLUDED.password_hash;
-    `;
-
-    // Admin Eleanor Wright
-    await sql`
-      INSERT INTO lms_users (id, name, handle, role, email, password_hash, avatar, bio, rating, max_rating, streak, solved_count, is_public, semester, department, status)
-      VALUES (
-        'usr_admin_01',
-        'Eleanor Wright',
-        'admin_wright',
-        'admin',
-        'eleanor.wright@admin.recon.edu',
-        ${defaultPasswordHash},
-        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-        'Platform Administrator & Chief Academic Director. Managing academic infrastructure, student quotas, and contest governance.',
-        1980,
-        2050,
-        45,
-        310,
-        false,
-        4,
-        'Academic Operations',
-        'Active'
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        password_hash = EXCLUDED.password_hash;
-    `;
-
-    // Pre-seed some default lesson progress for Alex Chen if none exists
-    await sql`
-      INSERT INTO lms_lesson_progress (user_id, subject_id, lesson_id, completed)
-      VALUES 
-        ('usr_student_01', 'cs201', 'les_cs201_01', true),
-        ('usr_student_01', 'cs201', 'les_cs201_02', true),
-        ('usr_student_01', 'cs201', 'les_cs201_03', true),
-        ('usr_student_01', 'cs202', 'les_cs202_01', true),
-        ('usr_student_01', 'cs203', 'les_cs203_01', true),
-        ('usr_student_01', 'cs203', 'les_cs203_02', true)
-      ON CONFLICT (user_id, subject_id, lesson_id) DO NOTHING;
     `;
 
     return {
       success: true,
       message:
-        "Neon DB initialized with tables, columns, indexes, and pre-seeded unique accounts (Sahana, Dr. Vance, Eleanor Wright).",
+        "Neon DB initialized with tables, columns, indexes, and institutional accounts (System Admin, Faculty Lead).",
     };
+
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("Database migration error:", message);

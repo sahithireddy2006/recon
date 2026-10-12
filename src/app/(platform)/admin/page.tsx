@@ -38,72 +38,31 @@ interface ManagedUser {
   lastLogin: string;
 }
 
-const INITIAL_USERS: ManagedUser[] = [
-  {
-    id: "u_1",
-    name: "Sahana",
-    email: "sahana@student.recon.edu",
-    role: "student",
-    status: "Active",
-    termOrDept: "Semester 4 (CS)",
-    lastLogin: "Just now",
-  },
-  {
-    id: "u_2",
-    name: "Dr. Marcus Vance",
-    email: "marcus.vance@faculty.recon.edu",
-    role: "teacher",
-    status: "Active",
-    termOrDept: "Faculty of CS",
-    lastLogin: "14 mins ago",
-  },
-  {
-    id: "u_3",
-    name: "Prof. Elena Rostova",
-    email: "elena.rostova@faculty.recon.edu",
-    role: "teacher",
-    status: "Active",
-    termOrDept: "Systems Architecture",
-    lastLogin: "2 hours ago",
-  },
-  {
-    id: "u_4",
-    name: "Eleanor Wright",
-    email: "eleanor.wright@admin.recon.edu",
-    role: "admin",
-    status: "Active",
-    termOrDept: "Platform Operations",
-    lastLogin: "1 hour ago",
-  },
-  {
-    id: "u_5",
-    name: "Jordan Lee",
-    email: "jordan.lee@student.recon.edu",
-    role: "student",
-    status: "Suspended",
-    termOrDept: "Semester 2 (Math)",
-    lastLogin: "4 days ago",
-  },
-];
-
 export default function AdminPage() {
   const { subjects, contests, currentUser } = useLMSStore();
   const [activeTab, setActiveTab] = useState<"users" | "curriculum" | "contests" | "logs">("users");
 
   // Users State
-  const [userList, setUserList] = useState<ManagedUser[]>(INITIAL_USERS);
+  const [userList, setUserList] = useState<ManagedUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState<boolean>(true);
   const [userSearch, setUserSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [createUserError, setCreateUserError] = useState<string | null>(null);
+  const [createUserSuccess, setCreateUserSuccess] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
-    role: "student" as "student" | "teacher",
-    department: "",
+    role: "teacher" as "student" | "teacher" | "admin",
+    handle: "",
+    password: "faculty123",
+    department: "Computer Science & Engineering",
   });
 
   // Fetch real users from Neon DB
   const loadUsersFromDb = React.useCallback(async () => {
+    setIsLoadingUsers(true);
     try {
       const res = await fetch("/api/admin/users");
       if (res.ok) {
@@ -124,6 +83,8 @@ export default function AdminPage() {
       }
     } catch (e) {
       console.error("Failed to load users from DB:", e);
+    } finally {
+      setIsLoadingUsers(false);
     }
   }, []);
 
@@ -153,21 +114,40 @@ export default function AdminPage() {
     e.preventDefault();
     if (!newUser.name || !newUser.email) return;
 
+    setCreateUserError(null);
+    setCreateUserSuccess(null);
+    setIsSubmitting(true);
+
     try {
       const res = await fetch("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newUser),
       });
+      const data = await res.json();
       if (res.ok) {
+        setCreateUserSuccess(`${newUser.role === "teacher" ? "Professor" : "User"} account created successfully!`);
         await loadUsersFromDb();
+        setTimeout(() => {
+          setIsAddUserOpen(false);
+          setNewUser({
+            name: "",
+            email: "",
+            role: "teacher",
+            handle: "",
+            password: "faculty123",
+            department: "Computer Science & Engineering",
+          });
+          setCreateUserSuccess(null);
+        }, 1200);
+      } else {
+        setCreateUserError(data.error || "Failed to create user.");
       }
     } catch (e) {
-      console.error("Error creating user:", e);
+      setCreateUserError("Network error occurred while provisioning user.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsAddUserOpen(false);
-    setNewUser({ name: "", email: "", role: "student", department: "" });
   };
 
   const toggleUserStatus = async (id: string) => {
@@ -256,27 +236,27 @@ export default function AdminPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card variant="dark" hasShadow className="p-4">
           <div className="flex items-center justify-between text-[#8E95A5] font-mono text-[10px] uppercase">
-            <span>Registered Students</span>
+            <span>Enrolled Students</span>
             <Users className="w-4 h-4 text-[#FFE600]" />
           </div>
           <div className="mt-2 font-display font-black text-2xl text-white">
-            3,420
+            {userList.filter((u) => u.role === "student").length}
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#00E599]">
-            +18 enrolled this week
+            Active Student Accounts
           </div>
         </Card>
 
         <Card variant="dark" hasShadow className="p-4">
           <div className="flex items-center justify-between text-[#8E95A5] font-mono text-[10px] uppercase">
-            <span>Instructors</span>
+            <span>Professors & Faculty</span>
             <ShieldCheck className="w-4 h-4 text-[#2D7FF9]" />
           </div>
           <div className="mt-2 font-display font-black text-2xl text-white">
-            48
+            {userList.filter((u) => u.role === "teacher").length}
           </div>
-          <div className="mt-1 font-mono text-[10px] text-[#8E95A5]">
-            4 Active departments
+          <div className="mt-1 font-mono text-[10px] text-[#2D7FF9]">
+            Admin-Provisioned Instructors
           </div>
         </Card>
 
@@ -289,20 +269,20 @@ export default function AdminPage() {
             {subjects.length}
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#FFE600]">
-            Term 1 through 8
+            Syllabus Modules Active
           </div>
         </Card>
 
         <Card variant="dark" hasShadow className="p-4">
           <div className="flex items-center justify-between text-[#8E95A5] font-mono text-[10px] uppercase">
-            <span>Live Contest Turnout</span>
+            <span>Competitive Contests</span>
             <Trophy className="w-4 h-4 text-[#00E599]" />
           </div>
           <div className="mt-2 font-display font-black text-2xl text-white">
-            1,284
+            {contests.length}
           </div>
           <div className="mt-1 font-mono text-[10px] text-[#00E599]">
-            Round #48 In Progress
+            Contest Rounds Ready
           </div>
         </Card>
       </div>
@@ -592,64 +572,66 @@ export default function AdminPage() {
 
           <div className="p-4 bg-[#090B0F] border-2 border-[#282F40] font-mono text-xs space-y-2 text-[#8E95A5] max-h-96 overflow-y-auto">
             <div className="text-white">
-              <span className="text-[#00E599]">[15:42:01 UTC]</span> Judge node #3: Accepted solution for task w48_prob_a by sahana (0.04s, 12MB).
+              <span className="text-[#00E599]">[SYSTEM]</span> Institutional PostgreSQL database connected & online.
             </div>
             <div>
-              <span className="text-[#FFE600]">[15:39:24 UTC]</span> Auth server: User sahana initialized Google OAuth single sign-on session.
+              <span className="text-[#FFE600]">[AUTH]</span> Bcrypt password verification active (10 rounds).
             </div>
             <div>
-              <span className="text-[#2D7FF9]">[15:30:12 UTC]</span> Assessment engine: Graded CS203 Mid-Term exam for 48 enrolled candidates.
+              <span className="text-[#2D7FF9]">[GOVERNANCE]</span> Academic administration clearance verified for current session.
             </div>
             <div>
-              <span className="text-[#FF5C58]">[15:15:00 UTC]</span> Contest scheduler: Weekly Algo Challenge #48 round unlocked for submissions.
-            </div>
-            <div>
-              <span className="text-[#8E95A5]">[14:55:18 UTC]</span> Content daemon: Dr. Marcus Vance updated study material &quot;CS201 Lecture Notes&quot;.
+              <span className="text-[#FF5C58]">[ARENA]</span> Real-time judging engine synchronized.
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL: ADD USER */}
+      {/* MODAL: PROVISION USER (PROFESSOR / STUDENT) */}
       <Modal
         isOpen={isAddUserOpen}
         onClose={() => setIsAddUserOpen(false)}
-        title="Provision New Platform User"
-        description="Creates an authorized account for instructor or student"
+        title="Provision Academic Account"
+        description="Create authorized Professor/Faculty or Student account in PostgreSQL"
         maxWidth="md"
       >
         <form onSubmit={handleCreateUser} className="space-y-4">
-          <div className="space-y-1">
-            <label className="font-mono text-xs uppercase text-[#8E95A5]">Full Name</label>
-            <Input
-              required
-              placeholder="e.g. Dr. Jordan Rivera"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-            />
-          </div>
+          {createUserError && (
+            <div className="p-3 bg-[#FF5C58]/15 border-2 border-[#FF5C58] text-[#FF5C58] font-mono text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span>{createUserError}</span>
+            </div>
+          )}
+
+          {createUserSuccess && (
+            <div className="p-3 bg-[#00E599]/15 border-2 border-[#00E599] text-[#00E599] font-mono text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
+              <span>{createUserSuccess}</span>
+            </div>
+          )}
 
           <div className="space-y-1">
-            <label className="font-mono text-xs uppercase text-[#8E95A5]">Official Email</label>
-            <Input
-              required
-              type="email"
-              placeholder="e.g. jordan.rivera@recon.edu"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="font-mono text-xs uppercase text-[#8E95A5]">Role Assignment</label>
-            <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+            <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Role Assignment</label>
+            <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+              <button
+                type="button"
+                onClick={() => setNewUser({ ...newUser, role: "teacher" })}
+                className={cn(
+                  "p-2.5 border font-bold uppercase transition-all",
+                  newUser.role === "teacher"
+                    ? "bg-[#2D7FF9] text-white border-black shadow-[2px_2px_0px_#000]"
+                    : "bg-[#0B0D10] text-[#8E95A5] border-[#282F40]"
+                )}
+              >
+                Professor / Faculty
+              </button>
               <button
                 type="button"
                 onClick={() => setNewUser({ ...newUser, role: "student" })}
                 className={cn(
-                  "p-2.5 border font-bold uppercase",
+                  "p-2.5 border font-bold uppercase transition-all",
                   newUser.role === "student"
-                    ? "bg-[#FFE600] text-black border-black"
+                    ? "bg-[#FFE600] text-black border-black shadow-[2px_2px_0px_#000]"
                     : "bg-[#0B0D10] text-[#8E95A5] border-[#282F40]"
                 )}
               >
@@ -657,26 +639,76 @@ export default function AdminPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setNewUser({ ...newUser, role: "teacher" })}
+                onClick={() => setNewUser({ ...newUser, role: "admin" })}
                 className={cn(
-                  "p-2.5 border font-bold uppercase",
-                  newUser.role === "teacher"
-                    ? "bg-[#2D7FF9] text-white border-black"
+                  "p-2.5 border font-bold uppercase transition-all",
+                  newUser.role === "admin"
+                    ? "bg-[#FF5C58] text-white border-black shadow-[2px_2px_0px_#000]"
                     : "bg-[#0B0D10] text-[#8E95A5] border-[#282F40]"
                 )}
               >
-                Teacher / Instructor
+                Admin
               </button>
             </div>
+            {newUser.role === "teacher" && (
+              <p className="text-[11px] font-mono text-[#2D7FF9] mt-1">
+                Faculty members can only be created by administrators and gain course management clearance.
+              </p>
+            )}
           </div>
 
           <div className="space-y-1">
-            <label className="font-mono text-xs uppercase text-[#8E95A5]">Department / Term</label>
+            <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Full Name</label>
             <Input
-              placeholder="e.g. Department of Computer Science"
-              value={newUser.department}
-              onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+              required
+              placeholder={newUser.role === "teacher" ? "e.g. Prof. Alan Turing" : "e.g. Jordan Rivera"}
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Official Email</label>
+              <Input
+                required
+                type="email"
+                placeholder={newUser.role === "teacher" ? "e.g. a.turing@faculty.recon.edu" : "e.g. jordan@recon.edu"}
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Handle (Optional)</label>
+              <Input
+                placeholder={newUser.role === "teacher" ? "e.g. prof_turing" : "e.g. jordan_r"}
+                value={newUser.handle}
+                onChange={(e) => setNewUser({ ...newUser, handle: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Initial Password</label>
+              <Input
+                required
+                type="text"
+                placeholder="Minimum 6 characters"
+                value={newUser.password}
+                onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">Department</label>
+              <Input
+                placeholder="e.g. Computer Science & Engineering"
+                value={newUser.department}
+                onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="pt-2 flex justify-end gap-2">
@@ -688,8 +720,8 @@ export default function AdminPage() {
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm">
-              Confirm & Provision User
+            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+              {isSubmitting ? "Provisioning..." : `Provision ${newUser.role === "teacher" ? "Professor" : "Account"}`}
             </Button>
           </div>
         </form>

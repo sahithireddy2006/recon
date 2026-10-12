@@ -31,34 +31,35 @@ export default function ProfilePage() {
 
   const achievements = [
     {
-      title: "Contest Top 10",
-      description: "Finished in single-digit rank in Weekly Algo Challenge.",
-      date: "Sep 2026",
-      icon: Trophy,
-      color: "bg-[#FFE600] text-black",
-    },
-    {
-      title: "18-Day Study Streak",
-      description: "Consistent daily engagement for over 2 consecutive weeks.",
-      date: "Active",
+      title: currentUser.streak >= 1 ? `${currentUser.streak}-Day Study Streak` : "Study Streak Starter",
+      description: currentUser.streak >= 7 ? "Consistent daily study progression maintained." : "Complete lessons and assessments daily to build your active streak.",
+      date: currentUser.streak > 0 ? "Active" : "Locked",
       icon: Flame,
       color: "bg-[#FF5C58] text-white",
     },
     {
-      title: "Algorithm Ace",
-      description: "Solved over 100 graph & dynamic programming problems.",
-      date: "Aug 2026",
+      title: "Problem Solver",
+      description: currentUser.solvedCount > 0 ? `Solved ${currentUser.solvedCount} verified algorithmic tasks in live rounds.` : "Solve problems in competitive rounds to earn points.",
+      date: currentUser.solvedCount > 0 ? "Unlocked" : "In Progress",
       icon: Star,
       color: "bg-[#2D7FF9] text-white",
     },
     {
-      title: "Database Specialist",
-      description: "Scored 90%+ on ACID, B+ Tree & 2PL assessments.",
-      date: "Aug 2026",
+      title: "Verified Scholar",
+      description: `Officially enrolled in ${currentUser.department || "Academic Engineering"}.`,
+      date: "Active",
+      icon: Trophy,
+      color: "bg-[#FFE600] text-black",
+    },
+    {
+      title: "Arena Contender",
+      description: `Current rating ${currentUser.rating} in ${ratingInfo.tier} division.`,
+      date: currentUser.rating > 1200 ? "Advanced" : "Entry Tier",
       icon: Award,
       color: "bg-[#00E599] text-black",
     },
   ];
+
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

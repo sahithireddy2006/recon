@@ -7,25 +7,27 @@ import {
   RatingHistoryPoint,
 } from "./types";
 
+export const EMPTY_USER: User = {
+  id: "",
+  name: "",
+  handle: "",
+  role: "student",
+  email: "",
+  avatar: "https://api.dicebear.com/7.x/bottts/svg?seed=recon_student",
+  bio: "",
+  rating: 1200,
+  maxRating: 1200,
+  streak: 0,
+  solvedCount: 0,
+  isPublic: true,
+  semester: 1,
+  department: "Computer Science & Engineering",
+  bestRank: 0,
+  accuracy: 100,
+};
+
 export const MOCK_USERS: Record<string, User> = {
-  student: {
-    id: "usr_student_01",
-    name: "Sahana",
-    handle: "sahana",
-    role: "student",
-    email: "sahana@student.recon.edu",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    bio: "CS Undergraduate @ RECON. Systems programmer, competitive coder, algorithm enthusiast. Aiming for Grandmaster.",
-    rating: 1742,
-    maxRating: 1810,
-    streak: 18,
-    solvedCount: 142,
-    isPublic: true,
-    semester: 4,
-    department: "Computer Science & Engineering",
-    bestRank: 7,
-    accuracy: 91.4,
-  },
+  student: EMPTY_USER,
   teacher: {
     id: "usr_teacher_01",
     name: "Dr. Marcus Vance",
@@ -46,13 +48,13 @@ export const MOCK_USERS: Record<string, User> = {
   },
   admin: {
     id: "usr_admin_01",
-    name: "Eleanor Wright",
-    handle: "admin_wright",
+    name: "System Administrator",
+    handle: "admin",
     role: "admin",
-    email: "eleanor.wright@admin.recon.edu",
+    email: "admin@recon.edu",
     avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80",
     bio: "Platform Administrator & Chief Academic Director. Managing academic infrastructure, student quotas, and contest governance.",
-    rating: 1980,
+    rating: 2000,
     maxRating: 2050,
     streak: 45,
     solvedCount: 310,
@@ -63,6 +65,7 @@ export const MOCK_USERS: Record<string, User> = {
     accuracy: 94.0,
   },
 };
+
 
 export const MOCK_SUBJECTS: Subject[] = [
   {
@@ -75,7 +78,7 @@ export const MOCK_SUBJECTS: Subject[] = [
     instructorEmail: "marcus.vance@faculty.recon.edu",
     description:
       "Advanced algorithm analysis, balanced search trees, graph algorithms, dynamic programming, and amortized complexity.",
-    progressPercent: 68,
+    progressPercent: 0,
     color: "coral",
     lessons: [
       {
@@ -85,7 +88,7 @@ export const MOCK_SUBJECTS: Subject[] = [
         module: "Module 1: Complexity Theory",
         order: 1,
         durationMinutes: 45,
-        completed: true,
+        completed: false,
         summary:
           "Master Big-O, Big-Omega, Big-Theta, and solving divide-and-conquer recurrences via the Master Theorem.",
         content: `### Complexity Analysis
@@ -117,7 +120,7 @@ int binarySearch(int arr[], int l, int r, int x) {
         module: "Module 2: Advanced Trees",
         order: 2,
         durationMinutes: 60,
-        completed: true,
+        completed: false,
         summary:
           "Tree rotation mechanics, color invariants, and maintaining $O(\\log n)$ worst-case search and insertion bounds.",
         content: `### Red-Black Tree Invariants
@@ -140,7 +143,7 @@ int binarySearch(int arr[], int l, int r, int x) {
         module: "Module 3: Graph Theory",
         order: 3,
         durationMinutes: 75,
-        completed: true,
+        completed: false,
         summary:
           "Single-source shortest paths on weighted directed graphs with priority queues and negative cycle detection.",
         content: `### Dijkstra's Algorithm
@@ -213,8 +216,7 @@ for (int i = 0; i < n; i++) {
         durationMinutes: 30,
         passingScore: 70,
         maxAttempts: 3,
-        completed: true,
-        userScore: 88,
+        completed: false,
         questions: [
           {
             id: "q1",
@@ -276,7 +278,7 @@ for (int i = 0; i < n; i++) {
     instructorEmail: "elena.rostova@faculty.recon.edu",
     description:
       "Instruction set architectures (RISC-V/x86-64), pipelined execution hazards, memory hierarchies, cache coherence, and out-of-order execution.",
-    progressPercent: 52,
+    progressPercent: 0,
     color: "yellow",
     lessons: [
       {
@@ -286,7 +288,7 @@ for (int i = 0; i < n; i++) {
         module: "Module 1: Pipeline Foundations",
         order: 1,
         durationMinutes: 50,
-        completed: true,
+        completed: false,
         summary: "5-stage classical pipeline (IF, ID, EX, MEM, WB) and datapath control signals.",
         content: `### 5-Stage RISC Pipeline
 1. **Instruction Fetch (IF)**: Retrieve instruction from I-Cache using Program Counter (PC).
@@ -376,7 +378,7 @@ assign forwardA = (ex_mem_regwrite && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs
     instructorEmail: "aris.thorne@faculty.recon.edu",
     description:
       "Relational algebra, SQL optimization, B+ Tree indexing, Write-Ahead Logging (WAL), ARIES recovery, and concurrency control.",
-    progressPercent: 82,
+    progressPercent: 0,
     color: "blue",
     lessons: [
       {
@@ -386,7 +388,7 @@ assign forwardA = (ex_mem_regwrite && (ex_mem_rd != 0) && (ex_mem_rd == id_ex_rs
         module: "Module 1: Disk Storage & Indexing",
         order: 1,
         durationMinutes: 55,
-        completed: true,
+        completed: false,
         summary: "Disk page layout, slotted pages, B+ Tree search, range scans, and concurrent latching protocols.",
         content: `### Why B+ Trees in Databases?
 Unlike binary search trees, B+ Trees have a high fan-out (e.g. 100-500 keys per node), reducing disk I/O operations to $O(\\log_B N)$ page reads. All record pointers reside strictly in the leaf nodes, connected via linked sibling pointers for high-performance range queries.`,
@@ -406,7 +408,7 @@ struct LeafNode<K, V> {
         module: "Module 2: Concurrency & Transactions",
         order: 2,
         durationMinutes: 60,
-        completed: true,
+        completed: false,
         summary: "Strict 2PL, deadlock detection with wait-for graphs, and snapshot isolation.",
         content: `### Strict 2PL Protocol
 1. **Growing Phase**: Transaction acquires all required shared (S) and exclusive (X) locks.
@@ -438,8 +440,7 @@ COMMIT;`,
         durationMinutes: 35,
         passingScore: 75,
         maxAttempts: 2,
-        completed: true,
-        userScore: 94,
+        completed: false,
         questions: [
           {
             id: "q_cs203_1",
@@ -462,7 +463,7 @@ COMMIT;`,
     instructorEmail: "kenneth.meyer@faculty.recon.edu",
     description:
       "Mathematical logic, combinatorics, generating functions, Euler tours, planar graphs, and Ramsey theory.",
-    progressPercent: 70,
+    progressPercent: 0,
     color: "charcoal",
     lessons: [
       {
@@ -472,7 +473,7 @@ COMMIT;`,
         module: "Module 1: Graph Traversal Proofs",
         order: 1,
         durationMinutes: 40,
-        completed: true,
+        completed: false,
         summary: "Necessary and sufficient conditions for Euler trails and Dirac's theorem for Hamiltonian cycles.",
         content: `### Euler's Theorem
 A connected graph $G$ has an Eulerian circuit if and only if every vertex in $G$ has an even degree.`,
@@ -516,7 +517,7 @@ export const MOCK_CONTESTS: Contest[] = [
     durationMinutes: 120,
     participantsCount: 1284,
     problemsCount: 4,
-    registered: true,
+    registered: false,
     problems: [
       {
         id: "w48_prob_a",
@@ -587,7 +588,7 @@ def solve():
 if __name__ == '__main__':
     solve()`,
         },
-        solved: true,
+        solved: false,
       },
       {
         id: "w48_prob_b",
@@ -718,8 +719,8 @@ int main() {
       },
       {
         rank: 14,
-        userId: "usr_student_01",
-        handle: "sahana",
+        userId: "cf_07",
+        handle: "code_warrior",
         rating: 1742,
         solvedCount: 1,
         penaltyTime: 16,

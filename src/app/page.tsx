@@ -229,10 +229,10 @@ int main() {
                     Live Leaderboard Standing
                   </div>
                   <div className="font-display font-black text-2xl uppercase">
-                    Sahana · Rank #14
+                    {isAuthenticated ? `${currentUser.name} · Rank #${currentUser.bestRank || "—"}` : "Active Scholar · Live Standings"}
                   </div>
                   <div className="font-mono text-xs text-black/80 font-bold">
-                    Rating: 1742 (Expert) · 18-Day Streak 🔥
+                    {isAuthenticated ? `Rating: ${currentUser.rating} · ${currentUser.streak}-Day Streak 🔥` : "Real-Time Ranking & Assessment Telemetry"}
                   </div>
                 </div>
 
@@ -497,8 +497,8 @@ int main() {
                   </tr>
                   <tr className="bg-[#FFE600]/10 border-l-4 border-l-[#FFE600]">
                     <td className="py-2.5 px-3 font-bold text-white">#14</td>
-                    <td className="py-2.5 px-3 font-bold text-[#2D7FF9]">sahana (You)</td>
-                    <td className="py-2.5 px-3 text-[#2D7FF9] font-bold">1742 Expert</td>
+                    <td className="py-2.5 px-3 font-bold text-[#2D7FF9]">{isAuthenticated ? `${currentUser.handle} (You)` : "code_warrior"}</td>
+                    <td className="py-2.5 px-3 text-[#2D7FF9] font-bold">{isAuthenticated ? `${currentUser.rating} Rating` : "1742 Expert"}</td>
                     <td className="py-2.5 px-3 text-center text-[#00E599] font-bold">1 / 4</td>
                     <td className="py-2.5 px-3 text-right text-[#8E95A5]">16 min</td>
                   </tr>

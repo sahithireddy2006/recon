@@ -9,6 +9,7 @@ import {
   NotificationItem,
 } from "./types";
 import {
+  EMPTY_USER,
   MOCK_USERS,
   MOCK_SUBJECTS,
   MOCK_CONTESTS,
@@ -20,7 +21,7 @@ interface LMSStoreContextType {
   currentRole: UserRole;
   isAuthenticated: boolean;
   isLoadingSession: boolean;
-  login: (identifier: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (identifier: string, password: string) => Promise<{ success: boolean; user?: User; error?: string }>;
   register: (data: {
     name: string;
     handle: string;
@@ -28,7 +29,7 @@ interface LMSStoreContextType {
     password: string;
     department?: string;
     semester?: number;
-  }) => Promise<{ success: boolean; error?: string }>;
+  }) => Promise<{ success: boolean; user?: User; error?: string }>;
   logout: () => Promise<void>;
   selectedSemester: number;
   setSelectedSemester: (sem: number) => void;
@@ -60,11 +61,11 @@ interface LMSStoreContextType {
 const LMSStoreContext = createContext<LMSStoreContextType | undefined>(undefined);
 
 export function LMSProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS.student);
+  const [currentUser, setCurrentUser] = useState<User>(EMPTY_USER);
   const [currentRole, setCurrentRole] = useState<UserRole>("student");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
-  const [selectedSemester, setSelectedSemester] = useState<number>(4);
+  const [selectedSemester, setSelectedSemester] = useState<number>(1);
   const [subjects, setSubjects] = useState<Subject[]>(MOCK_SUBJECTS);
   const [contests, setContests] = useState<Contest[]>(MOCK_CONTESTS);
   const [notifications, setNotifications] = useState<NotificationItem[]>(MOCK_NOTIFICATIONS);
@@ -79,63 +80,64 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/auth/me");
       if (!res.ok) {
         setIsAuthenticated(false);
+        setCurrentUser(EMPTY_USER);
         return;
       }
       const data = await res.json();
       if (data.authenticated && data.user) {
         setCurrentUser(data.user);
         setCurrentRole(data.user.role);
-        setSelectedSemester(data.user.semester || 4);
+        setSelectedSemester(data.user.semester || 1);
         setIsAuthenticated(true);
 
         // Merge DB-persisted completed lessons
-        if (data.completedLessons && Array.isArray(data.completedLessons)) {
-          const completedSet = new Set(
-            data.completedLessons.map(
-              (l: { subjectId: string; lessonId: string }) => `${l.subjectId}_${l.lessonId}`
-            )
-          );
+        const completedSet = new Set(
+          (data.completedLessons || []).map(
+            (l: { subjectId: string; lessonId: string }) => `${l.subjectId}_${l.lessonId}`
+          )
+        );
 
-          setSubjects((prev) =>
-            prev.map((sub) => {
-              const updatedLessons = sub.lessons.map((les) => ({
-                ...les,
-                completed: completedSet.has(`${sub.id}_${les.id}`) || les.completed,
-              }));
-              const count = updatedLessons.filter((l) => l.completed).length;
-              return {
-                ...sub,
-                lessons: updatedLessons,
-                progressPercent: Math.round((count / updatedLessons.length) * 100),
-              };
-            })
-          );
-        }
+        setSubjects((prev) =>
+          prev.map((sub) => {
+            const updatedLessons = sub.lessons.map((les) => ({
+              ...les,
+              completed: completedSet.has(`${sub.id}_${les.id}`),
+            }));
+            const count = updatedLessons.filter((l) => l.completed).length;
+            return {
+              ...sub,
+              lessons: updatedLessons,
+              progressPercent: updatedLessons.length > 0 ? Math.round((count / updatedLessons.length) * 100) : 0,
+            };
+          })
+        );
 
         // Merge DB-persisted test scores
+        const scoreMap = new Map<string, number>();
         if (data.testAttempts && Array.isArray(data.testAttempts)) {
-          const scoreMap = new Map<string, number>();
           data.testAttempts.forEach((t: { testId: string; score: number }) => {
             if (!scoreMap.has(t.testId)) scoreMap.set(t.testId, t.score);
           });
-
-          setSubjects((prev) =>
-            prev.map((sub) => ({
-              ...sub,
-              tests: sub.tests.map((test) =>
-                scoreMap.has(test.id)
-                  ? { ...test, completed: true, userScore: scoreMap.get(test.id) }
-                  : test
-              ),
-            }))
-          );
         }
+
+        setSubjects((prev) =>
+          prev.map((sub) => ({
+            ...sub,
+            tests: sub.tests.map((test) =>
+              scoreMap.has(test.id)
+                ? { ...test, completed: true, userScore: scoreMap.get(test.id) }
+                : { ...test, completed: false, userScore: undefined }
+            ),
+          }))
+        );
       } else {
         setIsAuthenticated(false);
+        setCurrentUser(EMPTY_USER);
       }
     } catch (e) {
-      console.warn("Could not sync session with Neon DB, using local store:", e);
+      console.warn("Could not sync session with Neon DB:", e);
       setIsAuthenticated(false);
+      setCurrentUser(EMPTY_USER);
     } finally {
       setIsLoadingSession(false);
     }
@@ -159,9 +161,10 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
       }
       setCurrentUser(data.user);
       setCurrentRole(data.user.role);
-      setSelectedSemester(data.user.semester || 4);
+      setSelectedSemester(data.user.semester || 1);
+      setIsAuthenticated(true);
       await syncFromSession();
-      return { success: true };
+      return { success: true, user: data.user };
     } catch (err) {
       return { success: false, error: "Network error connecting to database" };
     }
@@ -189,8 +192,9 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
       setCurrentUser(data.user);
       setCurrentRole(data.user.role);
       setSelectedSemester(data.user.semester || 1);
+      setIsAuthenticated(true);
       await syncFromSession();
-      return { success: true };
+      return { success: true, user: data.user };
     } catch (err) {
       return { success: false, error: "Network error during registration" };
     }
@@ -204,7 +208,8 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
     setCurrentRole("student");
-    setCurrentUser(MOCK_USERS.student);
+    setCurrentUser(EMPTY_USER);
+    setIsAuthenticated(false);
     if (typeof window !== "undefined") {
       window.location.href = "/login";
     }

@@ -8,18 +8,30 @@ import {
   ShieldCheck,
   UserPlus,
   LogIn,
-  ArrowRight,
   ArrowLeft,
   AlertCircle,
   CheckCircle2,
   Lock,
   User,
+  Eye,
+  EyeOff,
+  Building,
+  Calendar,
+  Sparkles,
 } from "lucide-react";
 import { useLMSStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+const ACADEMIC_DEPARTMENTS = [
+  "Computer Science & Engineering",
+  "Electrical & Computer Engineering",
+  "Mathematics & Computing",
+  "Information Technology",
+  "Software Engineering",
+  "Artificial Intelligence & Data Science",
+];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,42 +42,80 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Login Form
-  const [loginIdentifier, setLoginIdentifier] = useState("sahana@student.recon.edu");
-  const [loginPassword, setLoginPassword] = useState("password123");
+  // Password visibility toggles
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirmPassword, setShowRegConfirmPassword] = useState(false);
 
-  // Registration Form (Unique Student)
+  // Production Login Form (empty credentials by default)
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
+  // Production Student Registration Form
   const [regName, setRegName] = useState("");
   const [regHandle, setRegHandle] = useState("");
   const [regEmail, setRegEmail] = useState("");
   const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
   const [regDepartment, setRegDepartment] = useState("Computer Science & Engineering");
-  const [regSemester, setRegSemester] = useState(4);
+  const [regSemester, setRegSemester] = useState(1);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-    setIsLoading(true);
+    setSuccessMessage(null);
 
-    const res = await login(loginIdentifier, loginPassword);
+    if (!loginIdentifier.trim() || !loginPassword) {
+      setErrorMessage("Please enter both your email/handle and password.");
+      return;
+    }
+
+    setIsLoading(true);
+    const res = await login(loginIdentifier.trim(), loginPassword);
     setIsLoading(false);
 
-    if (res.success) {
-      router.push("/dashboard");
+    if (res.success && res.user) {
+      setSuccessMessage("Authentication successful. Redirecting to your portal...");
+      setTimeout(() => {
+        if (res.user?.role === "admin") {
+          router.push("/admin");
+        } else if (res.user?.role === "teacher") {
+          router.push("/courses");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 500);
     } else {
-      setErrorMessage(res.error || "Invalid email or password.");
+      setErrorMessage(res.error || "Invalid email, handle, or password.");
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-    setIsLoading(true);
+    setSuccessMessage(null);
 
+    if (regPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters in length.");
+      return;
+    }
+
+    if (regPassword !== regConfirmPassword) {
+      setErrorMessage("Passwords do not match. Please re-enter.");
+      return;
+    }
+
+    const cleanHandle = regHandle.trim().toLowerCase().replace(/[^a-z0-9_]/g, "");
+    if (cleanHandle.length < 3) {
+      setErrorMessage("Handle must be at least 3 characters and contain only letters, numbers, and underscores.");
+      return;
+    }
+
+    setIsLoading(true);
     const res = await register({
-      name: regName,
-      handle: regHandle,
-      email: regEmail,
+      name: regName.trim(),
+      handle: cleanHandle,
+      email: regEmail.trim(),
       password: regPassword,
       department: regDepartment,
       semester: regSemester,
@@ -73,32 +123,19 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (res.success) {
-      setSuccessMessage("Account created successfully! Redirecting to your dashboard...");
+      setSuccessMessage("Student account registered successfully! Redirecting to dashboard...");
       setTimeout(() => {
         router.push("/dashboard");
-      }, 800);
+      }, 700);
     } else {
-      setErrorMessage(res.error || "Registration failed.");
-    }
-  };
-
-  // 1-Click Demo Pre-Fill
-  const handleDemoSignIn = async (email: string, pass: string, targetPath: string = "/dashboard") => {
-    setErrorMessage(null);
-    setIsLoading(true);
-    const res = await login(email, pass);
-    setIsLoading(false);
-    if (res.success) {
-      router.push(targetPath);
-    } else {
-      setErrorMessage(res.error || "Failed demo sign-in.");
+      setErrorMessage(res.error || "Registration failed. Please review your details.");
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0B0D10] text-[#EDEDED] flex flex-col justify-between p-4 sm:p-8 brutal-grid-bg">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between max-w-7xl mx-auto w-full pb-6">
+      {/* Top Chrome Bar */}
+      <div className="flex items-center justify-between max-w-6xl mx-auto w-full pb-6">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-9 h-9 bg-[#FF5C58] text-black flex items-center justify-center font-display font-black text-xl border-2 border-black brutal-shadow-sm group-hover:bg-[#FFE600] transition-colors">
             R
@@ -113,13 +150,13 @@ export default function LoginPage() {
           className="inline-flex items-center gap-1.5 font-mono text-xs text-[#8E95A5] hover:text-white uppercase tracking-wider transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Landing Page</span>
+          <span>Back to Home</span>
         </Link>
       </div>
 
       {/* Main Split Authentication Card */}
-      <div className="max-w-5xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-0 border-2 border-white brutal-shadow-white bg-[#12151D] my-auto">
-        {/* Left Column: Platform Manifesto & Neon DB status (5 cols) */}
+      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-0 border-2 border-white brutal-shadow-white bg-[#12151D] my-auto">
+        {/* Left Column: Academic Institutional Architecture (5 cols) */}
         <div className="lg:col-span-5 p-8 bg-[#0D1017] border-b-2 lg:border-b-0 lg:border-r-2 border-[#282F40] flex flex-col justify-between space-y-8">
           <div className="space-y-4">
             <span className="px-2.5 py-0.5 bg-[#FF5C58] text-white font-mono font-bold text-xs uppercase tracking-wider inline-block">
@@ -135,30 +172,53 @@ export default function LoginPage() {
             </h1>
 
             <p className="font-mono text-xs text-[#9DA7BC] leading-relaxed">
-              Every student and instructor possesses a unique identity and verified academic record, synchronized directly with live Neon PostgreSQL.
+              Official academic and competitive engineering platform. Structured curriculum progression, real-time assessment scoring, and verified student credentials.
             </p>
           </div>
 
+          {/* Access Policy Explanations */}
           <div className="space-y-3 font-mono text-xs">
-            <div className="p-3 bg-[#12151D] border border-[#282F40] flex items-center justify-between">
-              <span className="text-[#8E95A5]">Database Engine:</span>
-              <span className="text-[#00E599] font-bold">Neon Serverless Postgres</span>
+            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
+              <div className="flex items-center gap-2 text-[#FFE600] font-bold uppercase">
+                <GraduationCap className="w-4 h-4" />
+                <span>Student Access</span>
+              </div>
+              <p className="text-[11px] text-[#8E95A5] leading-normal">
+                Open student enrollment. Register a new account to enroll in courses, complete syllabus modules, and compete in rating rounds.
+              </p>
             </div>
-            <div className="p-3 bg-[#12151D] border border-[#282F40] flex items-center justify-between">
-              <span className="text-[#8E95A5]">Authentication:</span>
-              <span className="text-[#FFE600] font-bold">Bcrypt Credentials + Sessions</span>
+
+            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
+              <div className="flex items-center gap-2 text-[#2D7FF9] font-bold uppercase">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Faculty & Professors</span>
+              </div>
+              <p className="text-[11px] text-[#8E95A5] leading-normal">
+                Professor credentials are issued exclusively by University Administration. Instructors sign in using their issued faculty credentials.
+              </p>
+            </div>
+
+            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
+              <div className="flex items-center gap-2 text-[#FF5C58] font-bold uppercase">
+                <Lock className="w-4 h-4" />
+                <span>Administration</span>
+              </div>
+              <p className="text-[11px] text-[#8E95A5] leading-normal">
+                Platform governance and instructor management are restricted to authorized academic directors.
+              </p>
             </div>
           </div>
         </div>
 
         {/* Right Column: Authentication Form (7 cols) */}
         <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between space-y-6">
-          {/* Mode Switch Tabs (Log In vs Create Account) */}
+          {/* Mode Switch Tabs (Log In vs Student Register) */}
           <div className="flex border-2 border-[#282F40] bg-[#0B0D10] p-1 font-mono text-xs">
             <button
               onClick={() => {
                 setAuthMode("login");
                 setErrorMessage(null);
+                setSuccessMessage(null);
               }}
               className={cn(
                 "flex-1 py-2.5 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 brutal-btn",
@@ -168,13 +228,14 @@ export default function LoginPage() {
               )}
             >
               <LogIn className="w-4 h-4" />
-              <span>Log In</span>
+              <span>Sign In</span>
             </button>
 
             <button
               onClick={() => {
                 setAuthMode("register");
                 setErrorMessage(null);
+                setSuccessMessage(null);
               }}
               className={cn(
                 "flex-1 py-2.5 font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 brutal-btn",
@@ -184,35 +245,35 @@ export default function LoginPage() {
               )}
             >
               <UserPlus className="w-4 h-4" />
-              <span>Register New Student</span>
+              <span>Student Registration</span>
             </button>
           </div>
 
-          {/* Error / Success Banners */}
+          {/* Feedback Banners */}
           {errorMessage && (
-            <div className="p-3 bg-[#FF5C58]/15 border-2 border-[#FF5C58] text-[#FF5C58] font-mono text-xs flex items-center gap-2">
+            <div className="p-3.5 bg-[#FF5C58]/15 border-2 border-[#FF5C58] text-[#FF5C58] font-mono text-xs flex items-center gap-2.5 animate-in fade-in duration-200">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="p-3 bg-[#00E599]/15 border-2 border-[#00E599] text-[#00E599] font-mono text-xs flex items-center gap-2">
+            <div className="p-3.5 bg-[#00E599]/15 border-2 border-[#00E599] text-[#00E599] font-mono text-xs flex items-center gap-2.5 animate-in fade-in duration-200">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
           )}
 
-          {/* TAB 1: LOGIN FORM */}
+          {/* TAB 1: PRODUCTION LOGIN FORM */}
           {authMode === "login" && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <h2 className="font-display font-black text-xl uppercase tracking-tight text-white">
-                    Sign In to Your Account
+                    Sign In to Portal
                   </h2>
                   <span className="font-mono text-[10px] text-[#00E599] font-bold">
-                    ALL ROLES
+                    STUDENT · PROFESSOR · ADMIN
                   </span>
                 </div>
                 <p className="font-mono text-xs text-[#8E95A5]">
@@ -221,15 +282,16 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                  Email or Handle
+                <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold flex items-center justify-between">
+                  <span>Email or Handle</span>
                 </label>
                 <Input
                   type="text"
-                  placeholder="e.g. sahana or sahana@student.recon.edu"
+                  placeholder="e.g. username or user@institution.edu"
                   value={loginIdentifier}
                   onChange={(e) => setLoginIdentifier(e.target.value)}
                   required
+                  autoFocus
                 />
               </div>
 
@@ -238,50 +300,77 @@ export default function LoginPage() {
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
                     Password
                   </label>
-                  <span className="font-mono text-[10px] text-[#8E95A5]">
-                    Default: password123
-                  </span>
                 </div>
-                <Input
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showLoginPassword ? "text" : "password"}
+                    placeholder="Enter your account password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E95A5] hover:text-white"
+                    aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
 
               <Button
                 type="submit"
                 variant="secondary"
                 size="lg"
-                className="w-full text-black font-black"
+                className="w-full text-black font-black mt-2"
                 disabled={isLoading}
               >
-                <span>{isLoading ? "Authenticating against Neon DB..." : "Sign In to Platform →"}</span>
+                <span>{isLoading ? "Verifying Credentials..." : "Sign In to Platform →"}</span>
               </Button>
+
+              <div className="p-3 bg-[#0B0D10] border border-[#282F40] font-mono text-[11px] text-[#8E95A5] space-y-1">
+                <span className="font-bold text-white uppercase block">Need Help?</span>
+                <p>
+                  • <strong>Students:</strong> Register a new scholar profile using the Student Registration tab.
+                </p>
+                <p>
+                  • <strong>Faculty / Instructors:</strong> Professor accounts are managed by administration. Contact your department administrator if you need your faculty password reset.
+                </p>
+              </div>
             </form>
           )}
 
-          {/* TAB 2: REGISTER NEW UNIQUE STUDENT */}
+          {/* TAB 2: CLEAN STUDENT REGISTRATION FORM */}
           {authMode === "register" && (
-            <form onSubmit={handleRegisterSubmit} className="space-y-3">
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
               <div className="space-y-1">
                 <h2 className="font-display font-black text-xl uppercase tracking-tight text-white">
-                  Create Unique Student Profile
+                  Student Registration
                 </h2>
                 <p className="font-mono text-xs text-[#8E95A5]">
-                  Creates a distinct scholar record in Neon PostgreSQL with personal ratings and transcripts.
+                  Open self-service enrollment for students. Create your scholar profile to start coursework.
                 </p>
+              </div>
+
+              {/* Faculty Notice Callout */}
+              <div className="p-3 bg-[#2D7FF9]/10 border-2 border-[#2D7FF9] text-[#2D7FF9] font-mono text-xs flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="text-[11px] leading-relaxed">
+                  <span className="font-bold uppercase block">Faculty Notice:</span>
+                  Professor and instructor accounts are created exclusively by Academic Administration. If you are a faculty member, please do not register here; contact your department coordinator for your official credentials.
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Full Name
+                    Full Legal Name
                   </label>
                   <Input
                     required
-                    placeholder="e.g. Jane Doe"
+                    placeholder="e.g. Alexander Vance"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                   />
@@ -289,67 +378,109 @@ export default function LoginPage() {
 
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Unique Handle
+                    Unique Username / Handle
                   </label>
                   <Input
                     required
-                    placeholder="e.g. jane_coder"
+                    placeholder="e.g. alex_coder"
                     value={regHandle}
                     onChange={(e) => setRegHandle(e.target.value)}
                   />
                 </div>
               </div>
 
+              <div className="space-y-1">
+                <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
+                  Student Email Address
+                </label>
+                <Input
+                  required
+                  type="email"
+                  placeholder="e.g. alex@student.recon.edu or personal@email.com"
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Email Address
+                    Academic Department
                   </label>
-                  <Input
-                    required
-                    type="email"
-                    placeholder="e.g. jane@student.recon.edu"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                  />
+                  <select
+                    value={regDepartment}
+                    onChange={(e) => setRegDepartment(e.target.value)}
+                    className="w-full h-10 px-3 bg-[#0B0D10] border-2 border-[#282F40] text-white font-mono text-xs focus:border-[#FFE600] outline-none"
+                  >
+                    {ACADEMIC_DEPARTMENTS.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Password (Min 6 chars)
+                    Enrolled Semester
                   </label>
-                  <Input
-                    required
-                    type="password"
-                    placeholder="••••••••••••"
-                    value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
-                  />
+                  <select
+                    value={regSemester}
+                    onChange={(e) => setRegSemester(Number(e.target.value))}
+                    className="w-full h-10 px-3 bg-[#0B0D10] border-2 border-[#282F40] text-white font-mono text-xs focus:border-[#FFE600] outline-none"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                      <option key={sem} value={sem}>
+                        Term {sem} (Semester {sem})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Department
+                    Password (Min 6 chars)
                   </label>
-                  <Input
-                    value={regDepartment}
-                    onChange={(e) => setRegDepartment(e.target.value)}
-                  />
+                  <div className="relative">
+                    <Input
+                      required
+                      type={showRegPassword ? "text" : "password"}
+                      placeholder="••••••••••••"
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegPassword(!showRegPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E95A5] hover:text-white"
+                    >
+                      {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-1">
                   <label className="font-mono text-xs uppercase text-[#8E95A5] font-bold">
-                    Current Term
+                    Confirm Password
                   </label>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={8}
-                    value={regSemester}
-                    onChange={(e) => setRegSemester(Number(e.target.value))}
-                  />
+                  <div className="relative">
+                    <Input
+                      required
+                      type={showRegConfirmPassword ? "text" : "password"}
+                      placeholder="••••••••••••"
+                      value={regConfirmPassword}
+                      onChange={(e) => setRegConfirmPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRegConfirmPassword(!showRegConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E95A5] hover:text-white"
+                    >
+                      {showRegConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -360,55 +491,11 @@ export default function LoginPage() {
                 className="w-full text-white font-black mt-2"
                 disabled={isLoading}
               >
-                <span>{isLoading ? "Provisioning account in Neon DB..." : "Create Student Account & Enter →"}</span>
+                <span>{isLoading ? "Creating Student Account..." : "Create Student Account & Enter →"}</span>
               </Button>
             </form>
           )}
-
-          {/* 1-CLICK DEMO AUTHENTICATION LINKS */}
-          <div className="pt-4 border-t-2 border-[#282F40] space-y-2">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-[#8E95A5] font-bold block">
-              Instant 1-Click Authenticated Personas:
-            </span>
-            <div className="grid grid-cols-3 gap-2 font-mono text-[11px]">
-              <button
-                type="button"
-                onClick={() =>
-                  handleDemoSignIn("sahana@student.recon.edu", "password123", "/dashboard")
-                }
-                className="p-2 bg-[#FFE600] text-black border border-black font-bold uppercase hover:opacity-90 brutal-btn truncate"
-                title="Student Sahana (Rating 1742 Expert)"
-              >
-                Student Sahana
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  handleDemoSignIn("marcus.vance@faculty.recon.edu", "password123", "/dashboard")
-                }
-                className="p-2 bg-[#2D7FF9] text-white border border-black font-bold uppercase hover:opacity-90 brutal-btn truncate"
-                title="Prof. Marcus Vance (Instructor)"
-              >
-                Prof. Vance
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  handleDemoSignIn("eleanor.wright@admin.recon.edu", "password123", "/admin")
-                }
-                className="p-2 bg-[#FF5C58] text-white border border-black font-bold uppercase hover:opacity-90 brutal-btn truncate"
-                title="Admin Eleanor Wright"
-              >
-                Admin Eleanor
-              </button>
-            </div>
-          </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="text-center font-mono text-xs text-[#8E95A5] pt-6">
-        RECON ACADEMIC SYSTEMS · POWERED BY NEON POSTGRESQL & NEO-BRUTALIST ARCHITECTURE
       </div>
     </div>
   );
