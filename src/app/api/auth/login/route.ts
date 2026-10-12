@@ -91,8 +91,9 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (error) {
     console.error("Login error:", error);
+    const detail = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Authentication failed. Server error." },
+      { error: `Authentication failed: ${detail}` },
       { status: 500 }
     );
   }

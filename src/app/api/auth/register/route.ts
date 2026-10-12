@@ -108,8 +108,9 @@ export async function POST(req: NextRequest) {
     return res;
   } catch (error) {
     console.error("Registration error:", error);
+    const detail = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { error: "Failed to register account. Database error occurred." },
+      { error: `Failed to register account: ${detail}` },
       { status: 500 }
     );
   }

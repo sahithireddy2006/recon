@@ -15,19 +15,38 @@ export function getCleanConnectionString(): string {
   const raw = process.env.DATABASE_URL || DEFAULT_NEON_URL;
   let clean = raw.trim();
 
-  // Strip accidental wrapping quotes
+  // If the variable contains multiple lines (e.g. pasted multiple times into Vercel UI), take the first valid line
+  if (clean.includes("\n") || clean.includes("\r")) {
+    const lines = clean
+      .split(/[\r\n]+/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    const validLine = lines.find(
+      (l) => l.startsWith("postgresql://") || l.startsWith("postgres://")
+    );
+    clean = (validLine || lines[0] || DEFAULT_NEON_URL).trim();
+  }
+
+  // Strip accidental wrapping quotes (single, double, backticks)
+  clean = clean.replace(/^["'`]+|["'`]+$/g, "").trim();
+
+  // Detect and reject placeholders from .env.example
   if (
-    (clean.startsWith('"') && clean.endsWith('"')) ||
-    (clean.startsWith("'") && clean.endsWith("'"))
+    clean.includes("ep-sample-pooler") ||
+    clean.includes("username:password") ||
+    clean.includes("your-neon-url")
   ) {
-    clean = clean.slice(1, -1).trim();
+    console.warn("Detected placeholder DATABASE_URL, falling back to live default Neon DB endpoint.");
+    return DEFAULT_NEON_URL;
   }
 
   // Validate URL format
   try {
     const parsed = new URL(clean);
     if (parsed.protocol === "postgresql:" || parsed.protocol === "postgres:") {
-      return clean;
+      if (parsed.hostname && parsed.hostname.length > 3) {
+        return clean;
+      }
     }
   } catch {
     console.warn("Invalid DATABASE_URL provided, falling back to default Neon DB endpoint.");
