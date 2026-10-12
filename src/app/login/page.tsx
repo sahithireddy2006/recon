@@ -4,20 +4,13 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  GraduationCap,
-  ShieldCheck,
   UserPlus,
   LogIn,
   ArrowLeft,
   AlertCircle,
   CheckCircle2,
-  Lock,
-  User,
   Eye,
   EyeOff,
-  Building,
-  Calendar,
-  Sparkles,
 } from "lucide-react";
 import { useLMSStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -141,7 +134,7 @@ export default function LoginPage() {
             R
           </div>
           <span className="font-display font-black text-lg tracking-tight uppercase text-white group-hover:text-[#FF5C58] transition-colors">
-            RECON <span className="text-[#FFE600]">// LMS</span>
+            RECON <span className="text-[#FFE600]">{"//"} LMS</span>
           </span>
         </Link>
 
@@ -157,7 +150,7 @@ export default function LoginPage() {
       {/* Main Split Authentication Card */}
       <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-0 border-2 border-white brutal-shadow-white bg-[#12151D] my-auto">
         {/* Left Column: Academic Institutional Architecture (5 cols) */}
-        <div className="lg:col-span-5 p-8 bg-[#0D1017] border-b-2 lg:border-b-0 lg:border-r-2 border-[#282F40] flex flex-col justify-between space-y-8">
+        <div className="lg:col-span-5 p-8 bg-[#0D1017] border-b-2 lg:border-b-0 lg:border-r-2 border-[#282F40] flex flex-col justify-center space-y-8">
           <div className="space-y-4">
             <span className="px-2.5 py-0.5 bg-[#FF5C58] text-white font-mono font-bold text-xs uppercase tracking-wider inline-block">
               INSTITUTIONAL GATEWAY
@@ -170,43 +163,6 @@ export default function LoginPage() {
               <br />
               <span className="text-[#2D7FF9]">One place to improve.</span>
             </h1>
-
-            <p className="font-mono text-xs text-[#9DA7BC] leading-relaxed">
-              Official academic and competitive engineering platform. Structured curriculum progression, real-time assessment scoring, and verified student credentials.
-            </p>
-          </div>
-
-          {/* Access Policy Explanations */}
-          <div className="space-y-3 font-mono text-xs">
-            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
-              <div className="flex items-center gap-2 text-[#FFE600] font-bold uppercase">
-                <GraduationCap className="w-4 h-4" />
-                <span>Student Access</span>
-              </div>
-              <p className="text-[11px] text-[#8E95A5] leading-normal">
-                Open student enrollment. Register a new account to enroll in courses, complete syllabus modules, and compete in rating rounds.
-              </p>
-            </div>
-
-            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
-              <div className="flex items-center gap-2 text-[#2D7FF9] font-bold uppercase">
-                <ShieldCheck className="w-4 h-4" />
-                <span>Faculty & Professors</span>
-              </div>
-              <p className="text-[11px] text-[#8E95A5] leading-normal">
-                Professor credentials are issued exclusively by University Administration. Instructors sign in using their issued faculty credentials.
-              </p>
-            </div>
-
-            <div className="p-3 bg-[#12151D] border-2 border-[#282F40] space-y-1">
-              <div className="flex items-center gap-2 text-[#FF5C58] font-bold uppercase">
-                <Lock className="w-4 h-4" />
-                <span>Administration</span>
-              </div>
-              <p className="text-[11px] text-[#8E95A5] leading-normal">
-                Platform governance and instructor management are restricted to authorized academic directors.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -268,13 +224,10 @@ export default function LoginPage() {
           {authMode === "login" && (
             <form onSubmit={handleLoginSubmit} className="space-y-4">
               <div className="space-y-1">
-                <div className="flex items-center justify-between">
+                <div>
                   <h2 className="font-display font-black text-xl uppercase tracking-tight text-white">
                     Sign In to Portal
                   </h2>
-                  <span className="font-mono text-[10px] text-[#00E599] font-bold">
-                    STUDENT · PROFESSOR · ADMIN
-                  </span>
                 </div>
                 <p className="font-mono text-xs text-[#8E95A5]">
                   Enter your registered institutional email or unique handle.
@@ -329,16 +282,6 @@ export default function LoginPage() {
               >
                 <span>{isLoading ? "Verifying Credentials..." : "Sign In to Platform →"}</span>
               </Button>
-
-              <div className="p-3 bg-[#0B0D10] border border-[#282F40] font-mono text-[11px] text-[#8E95A5] space-y-1">
-                <span className="font-bold text-white uppercase block">Need Help?</span>
-                <p>
-                  • <strong>Students:</strong> Register a new scholar profile using the Student Registration tab.
-                </p>
-                <p>
-                  • <strong>Faculty / Instructors:</strong> Professor accounts are managed by administration. Contact your department administrator if you need your faculty password reset.
-                </p>
-              </div>
             </form>
           )}
 
@@ -354,14 +297,6 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* Faculty Notice Callout */}
-              <div className="p-3 bg-[#2D7FF9]/10 border-2 border-[#2D7FF9] text-[#2D7FF9] font-mono text-xs flex items-start gap-2">
-                <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
-                <div className="text-[11px] leading-relaxed">
-                  <span className="font-bold uppercase block">Faculty Notice:</span>
-                  Professor and instructor accounts are created exclusively by Academic Administration. If you are a faculty member, please do not register here; contact your department coordinator for your official credentials.
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">

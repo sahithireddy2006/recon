@@ -147,9 +147,7 @@ export default function LandingPage() {
               <span className="text-[#FF5C58] inline-block">ONE PLACE TO IMPROVE.</span>
             </h1>
 
-            <p className="font-mono text-sm sm:text-base text-[#DCE2EE] max-w-2xl leading-relaxed pt-2">
-              A serious university-grade Learning Management System engineered with strict Neo-Brutalist discipline. Zero generic templates. Built for structured computer science curricula, real-time code assessments, and high-frequency rating rounds.
-            </p>
+
           </div>
 
           {/* Primary & Secondary CTAs */}

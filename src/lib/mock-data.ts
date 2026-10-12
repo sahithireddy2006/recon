@@ -6,6 +6,7 @@ import {
   HeatmapDay,
   RatingHistoryPoint,
 } from "./types";
+import { getRandomContestProblems } from "./questions-pool";
 
 export const EMPTY_USER: User = {
   id: "",
@@ -516,164 +517,9 @@ export const MOCK_CONTESTS: Contest[] = [
     endTime: "2026-09-23T20:00:00Z",
     durationMinutes: 120,
     participantsCount: 1284,
-    problemsCount: 4,
+    problemsCount: 5,
     registered: false,
-    problems: [
-      {
-        id: "w48_prob_a",
-        contestId: "weekly-48",
-        index: "A",
-        title: "Lexicographical Substring Partition",
-        difficulty: "Easy",
-        points: 500,
-        timeLimitSec: 1.0,
-        memoryLimitMB: 256,
-        description:
-          "Given a binary string $S$ of length $N$, find the minimum number of non-overlapping substrings such that every substring is in lexicographical ascending order (i.e. '0' characters precede '1' characters).",
-        inputFormat:
-          "The first line contains an integer $T$ ($1 \\le T \\le 100$) — the number of test cases. Each test case consists of an integer $N$ followed by the string $S$.",
-        outputFormat:
-          "For each test case, output a single integer representing the minimum number of partitions.",
-        sampleTests: [
-          {
-            input: "3\n5\n00111\n4\n1010\n6\n111000",
-            output: "1\n2\n2",
-            explanation:
-              "In '00111', the whole string is non-decreasing so 1 partition is sufficient. In '1010', we partition into '1' and '010' or '10' and '10'.",
-          },
-        ],
-        starterCode: {
-          cpp: `#include <bits/stdc++.h>
-using namespace std;
-
-void solve() {
-    int n; cin >> n;
-    string s; cin >> s;
-    // Write your solution here
-    int partitions = 1;
-    for (int i = 1; i < n; i++) {
-        if (s[i-1] == '1' && s[i] == '0') {
-            partitions++;
-        }
-    }
-    cout << partitions << "\\n";
-}
-
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    int t; cin >> t;
-    while (t--) solve();
-    return 0;
-}`,
-          python: `import sys
-
-def solve():
-    input = sys.stdin.read
-    data = input().split()
-    if not data: return
-    t = int(data[0])
-    idx = 1
-    for _ in range(t):
-        n = int(data[idx])
-        s = data[idx+1]
-        idx += 2
-        # Partition calculation
-        ans = 1
-        for i in range(1, n):
-            if s[i-1] == '1' and s[i] == '0':
-                ans += 1
-        print(ans)
-
-if __name__ == '__main__':
-    solve()`,
-        },
-        solved: false,
-      },
-      {
-        id: "w48_prob_b",
-        contestId: "weekly-48",
-        index: "B",
-        title: "Minimum XOR Spanning Tree",
-        difficulty: "Medium",
-        points: 1000,
-        timeLimitSec: 2.0,
-        memoryLimitMB: 256,
-        description:
-          "You are given an array of $N$ integers $A_1, A_2, \\dots, A_N$. Consider a complete graph with $N$ vertices where the weight of the edge between vertex $i$ and $j$ is $A_i \\oplus A_j$ (bitwise XOR). Compute the total weight of the Minimum Spanning Tree of this graph.",
-        inputFormat:
-          "The first line contains an integer $N$ ($1 \\le N \\le 2 \\times 10^5$). The second line contains $N$ distinct integers $A_1, A_2, \\dots, A_N$ ($0 \\le A_i < 2^{30}$).",
-        outputFormat: "Output a single integer — the minimum total weight.",
-        sampleTests: [
-          {
-            input: "4\n1 2 3 4",
-            output: "8",
-            explanation:
-              "Optimal edges: (1, 3) weight 2, (2, 3) weight 1, (1, 4) weight 5. Total = 8.",
-          },
-        ],
-        starterCode: {
-          cpp: `#include <bits/stdc++.h>
-using namespace std;
-typedef long long ll;
-
-int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    int n; cin >> n;
-    vector<int> a(n);
-    for (int i = 0; i < n; i++) cin >> a[i];
-    // Boruvka + Trie solution
-    return 0;
-}`,
-        },
-        solved: false,
-      },
-      {
-        id: "w48_prob_c",
-        contestId: "weekly-48",
-        index: "C",
-        title: "Subtree Frequency Queries",
-        difficulty: "Medium",
-        points: 1500,
-        timeLimitSec: 2.5,
-        memoryLimitMB: 512,
-        description:
-          "You are given a rooted tree with $N$ vertices numbered $1$ to $N$, with vertex $1$ as root. Each vertex has a color $C_v$. You must answer $Q$ queries: given vertex $u$ and integer $k$, how many colors appear at least $k$ times in the subtree of $u$?",
-        inputFormat:
-          "The first line contains $N$ and $Q$. The second line contains $N$ integers $C_1, \\dots, C_N$. The next $N-1$ lines contain edges.",
-        outputFormat: "Output the answer for each query on a new line.",
-        sampleTests: [
-          {
-            input: "5 2\n1 2 1 1 2\n1 2\n1 3\n2 4\n2 5\n1 2\n2 1",
-            output: "2\n2",
-          },
-        ],
-        starterCode: {
-          cpp: `// Sack on Tree / DSU on Tree pattern\n#include <bits/stdc++.h>\nusing namespace std;\n`,
-        },
-        solved: false,
-      },
-      {
-        id: "w48_prob_d",
-        contestId: "weekly-48",
-        index: "D",
-        title: "Quantum State Superposition Permutations",
-        difficulty: "Hard",
-        points: 2250,
-        timeLimitSec: 3.0,
-        memoryLimitMB: 512,
-        description:
-          "Given a permutation $P$ of length $N$, find the number of valid sequences of length $M$ satisfying the phase condition modulo $998244353$.",
-        inputFormat: "The first line contains $N$ and $M$.",
-        outputFormat: "Output the result modulo $998244353$.",
-        sampleTests: [{ input: "3 4\n1 2 3", output: "16" }],
-        starterCode: {
-          cpp: `// NTT polynomial multiplication required\n#include <bits/stdc++.h>\nusing namespace std;\n`,
-        },
-        solved: false,
-      },
-    ],
+    problems: getRandomContestProblems("weekly-48", 5),
     leaderboard: [
       {
         rank: 1,

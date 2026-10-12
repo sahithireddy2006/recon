@@ -397,54 +397,88 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
+                type="button"
                 onClick={() => {
                   if (themeMode !== "dark") toggleTheme();
                 }}
                 className={cn(
-                  "p-5 text-left border-2 transition-all flex flex-col justify-between h-40 brutal-btn",
+                  "theme-preview-dark p-5 text-left border-2 transition-all flex flex-col justify-between h-44 brutal-btn relative",
                   themeMode === "dark"
-                    ? "bg-[#0B0D10] text-white border-white brutal-shadow-white"
-                    : "bg-[#12151D] text-[#8E95A5] border-[#282F40]"
+                    ? "border-white shadow-[4px_4px_0px_#FFFFFF]"
+                    : "border-[#4A5568] hover:border-white opacity-85 hover:opacity-100"
                 )}
               >
                 <div>
-                  <div className="font-display font-black text-sm uppercase">
-                    Dark Brutalism (Default)
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="font-display font-black text-sm uppercase tracking-wide text-white preview-title">
+                      Dark Brutalism (Default)
+                    </div>
+                    {themeMode === "dark" ? (
+                      <span className="px-2 py-0.5 bg-[#00E599] text-black font-mono font-bold text-[10px] uppercase border border-black shrink-0">
+                        ACTIVE
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 bg-[#282F40] text-white font-mono text-[10px] uppercase border border-white/20 shrink-0">
+                        SELECT
+                      </span>
+                    )}
                   </div>
-                  <div className="font-mono text-xs text-[#8E95A5] mt-1">
+                  <div className="font-mono text-xs text-[#9DA7BC] leading-relaxed preview-desc">
                     Deep charcoal canvas, electric accents, maximum night contrast.
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <span className="w-4 h-4 bg-[#FF5C58] border border-black" />
-                  <span className="w-4 h-4 bg-[#FFE600] border border-black" />
-                  <span className="w-4 h-4 bg-[#2D7FF9] border border-black" />
+                <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                  <div className="flex gap-2">
+                    <span className="w-4 h-4 bg-[#FF5C58] border border-black" />
+                    <span className="w-4 h-4 bg-[#FFE600] border border-black" />
+                    <span className="w-4 h-4 bg-[#2D7FF9] border border-black" />
+                  </div>
+                  <span className="font-mono text-[10px] text-[#8E95A5] uppercase">
+                    CANVAS #0B0D10
+                  </span>
                 </div>
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   if (themeMode !== "light") toggleTheme();
                 }}
                 className={cn(
-                  "p-5 text-left border-2 transition-all flex flex-col justify-between h-40 brutal-btn",
+                  "theme-preview-light p-5 text-left border-2 transition-all flex flex-col justify-between h-44 brutal-btn relative",
                   themeMode === "light"
-                    ? "bg-[#FFFFFF] text-black border-black brutal-shadow"
-                    : "bg-[#12151D] text-[#8E95A5] border-[#282F40]"
+                    ? "border-black shadow-[4px_4px_0px_#000000]"
+                    : "border-neutral-400 hover:border-black opacity-95 hover:opacity-100"
                 )}
               >
                 <div>
-                  <div className="font-display font-black text-sm uppercase text-black">
-                    High-Contrast Light
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="font-display font-black text-sm uppercase tracking-wide text-black preview-title">
+                      High-Contrast Light
+                    </div>
+                    {themeMode === "light" ? (
+                      <span className="px-2 py-0.5 bg-[#FFE600] text-black font-mono font-black text-[10px] uppercase border border-black shrink-0">
+                        ACTIVE
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 bg-black text-white font-mono text-[10px] uppercase border border-black shrink-0">
+                        SELECT
+                      </span>
+                    )}
                   </div>
-                  <div className="font-mono text-xs text-black/70 mt-1">
+                  <div className="font-mono text-xs text-[#4A5568] leading-relaxed preview-desc">
                     Off-white paper surface with heavy 2px black editorial ink borders.
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <span className="w-4 h-4 bg-[#FF5C58] border border-black" />
-                  <span className="w-4 h-4 bg-[#FFE600] border border-black" />
-                  <span className="w-4 h-4 bg-[#2D7FF9] border border-black" />
+                <div className="flex items-center justify-between pt-3 border-t border-black/10">
+                  <div className="flex gap-2">
+                    <span className="w-4 h-4 bg-[#FF5C58] border border-black" />
+                    <span className="w-4 h-4 bg-[#FFE600] border border-black" />
+                    <span className="w-4 h-4 bg-[#2D7FF9] border border-black" />
+                  </div>
+                  <span className="font-mono text-[10px] text-[#4A5568] uppercase">
+                    CANVAS #F4F4F0
+                  </span>
                 </div>
               </button>
             </div>

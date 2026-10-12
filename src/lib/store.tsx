@@ -71,7 +71,15 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>(MOCK_NOTIFICATIONS);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
-  const [themeMode, setThemeMode] = useState<"dark" | "light">("dark");
+  const [themeMode, setThemeMode] = useState<"dark" | "light">(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("recon_theme");
+        if (saved === "light" || saved === "dark") return saved;
+      } catch {}
+    }
+    return "dark";
+  });
   const [isDbConnected, setIsDbConnected] = useState(true);
 
   // Sync state from active session in Neon DB
@@ -144,6 +152,7 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     syncFromSession();
   }, [syncFromSession]);
 
@@ -369,8 +378,28 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleTheme = () => {
-    setThemeMode((prev) => (prev === "dark" ? "light" : "dark"));
+    setThemeMode((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("recon_theme", next);
+        } catch {}
+      }
+      return next;
+    });
   };
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (themeMode === "dark") {
+        document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light-theme");
+      } else {
+        document.documentElement.classList.remove("dark");
+        document.documentElement.classList.add("light-theme");
+      }
+    }
+  }, [themeMode]);
 
   const updateUserProfile = async (data: Partial<User>) => {
     setCurrentUser((prev) => ({ ...prev, ...data }));
@@ -423,7 +452,7 @@ export function LMSProvider({ children }: { children: React.ReactNode }) {
         className={
           themeMode === "light"
             ? "light-theme min-h-screen bg-[#F4F4F0] text-black"
-            : "dark-theme min-h-screen bg-[#0B0D10] text-[#F0F2F5]"
+            : "dark dark-theme min-h-screen bg-[#0B0D10] text-[#F0F2F5]"
         }
       >
         {children}

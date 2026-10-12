@@ -280,7 +280,7 @@ export default function DashboardPage() {
               </h3>
               <Link
                 href="/courses"
-                className="font-mono text-xs text-[#FFE600] hover:underline uppercase tracking-wider font-bold"
+                className="font-mono text-xs px-2.5 py-0.5 bg-[#FFE600] text-black hover:bg-[#F2DA00] uppercase tracking-wider font-black border border-black brutal-shadow-sm brutal-btn transition-transform"
               >
                 View All Courses →
               </Link>

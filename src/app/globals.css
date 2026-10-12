@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     border-radius: 0px !important;
@@ -83,3 +85,143 @@
 .font-tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Neo-Brutalist High-Contrast Light Theme */
+.light-theme {
+  --canvas: #F4F4F0;
+  --surface-dark: #FFFFFF;
+  --surface-dark-elevated: #EFEFEA;
+  --surface-border: #000000;
+  background-color: #F4F4F0 !important;
+  color: #0A0D12 !important;
+}
+
+/* Backgrounds: Universal coverage across ANY element (div, a, button, nav, header, aside, section, article) */
+.light-theme [class*="bg-[#0B0D10]"],
+.light-theme [class*="bg-[#0D1017]"] {
+  background-color: #F4F4F0 !important;
+  color: #0A0D12 !important;
+  border-color: #000000 !important;
+}
+
+.light-theme [class*="bg-[#12151D]"] {
+  background-color: #FFFFFF !important;
+  color: #0A0D12 !important;
+  border-color: #000000 !important;
+}
+
+.light-theme [class*="bg-[#1A1F2B]"] {
+  background-color: #EAEAE4 !important;
+  color: #0A0D12 !important;
+  border-color: #000000 !important;
+}
+
+.light-theme [class*="bg-[#282F40]"] {
+  background-color: #D8D8D0 !important;
+  color: #0A0D12 !important;
+  border-color: #000000 !important;
+}
+
+/* Hover state overrides in light mode */
+.light-theme [class*="hover:bg-[#1A1F2B]"]:hover {
+  background-color: #E2E2DC !important;
+  border-color: #000000 !important;
+}
+
+.light-theme [class*="hover:border-white"]:hover {
+  border-color: #000000 !important;
+}
+
+/* Borders: Convert dark borders to crisp editorial 2px black borders */
+.light-theme [class*="border-[#282F40]"],
+.light-theme [class*="border-[#384156]"],
+.light-theme [class*="border-[#202736]"],
+.light-theme [class*="border-white"] {
+  border-color: #000000 !important;
+}
+
+/* Drop Shadows: Convert white shadows to deep black shadows */
+.light-theme .brutal-shadow-white,
+.light-theme [class*="shadow-[4px_4px_0px_#FFFFFF]"],
+.light-theme [class*="shadow-[3px_3px_0px_#FFFFFF]"] {
+  box-shadow: 4px 4px 0px #000000 !important;
+}
+
+.light-theme .brutal-shadow-sm {
+  box-shadow: 2px 2px 0px #000000 !important;
+}
+
+/* Text Colors: Dark high-contrast ink (except inside colored action buttons) */
+.light-theme [class*="text-white"]:not([class*="bg-[#FF5C58]"]):not([class*="bg-[#2D7FF9]"]):not([class*="bg-black"]) {
+  color: #0A0D12 !important;
+}
+
+.light-theme [class*="text-[#EDEDED]"],
+.light-theme [class*="text-[#F0F2F5]"] {
+  color: #0A0D12 !important;
+}
+
+.light-theme [class*="text-[#8E95A5]"],
+.light-theme [class*="text-[#9DA7BC]"],
+.light-theme [class*="text-[#DCE2EE]"] {
+  color: #4A5568 !important;
+}
+
+/* Prevent bright yellow text on light backgrounds */
+.light-theme [class*="text-[#FFE600]"]:not(button):not([class*="bg-black"]):not([class*="bg-[#0"]):not([class*="bg-[#1"]):not([class*="bg-[#2"]) {
+  color: #8C6D00 !important;
+}
+
+/* Outline and Ghost Buttons in light mode */
+.light-theme button[class*="border-[#384156]"],
+.light-theme a[class*="border-[#384156]"] {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+/* Form Inputs */
+.light-theme input,
+.light-theme select,
+.light-theme textarea {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* Light Grid Background */
+.light-theme .brutal-grid-bg {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px) !important;
+}
+
+/* True Theme Preview Cards - immune to global theme inversions */
+.theme-preview-dark {
+  background-color: #0B0D10 !important;
+  color: #FFFFFF !important;
+}
+
+.theme-preview-dark .preview-title {
+  color: #FFFFFF !important;
+}
+
+.theme-preview-dark .preview-desc {
+  color: #9DA7BC !important;
+}
+
+.theme-preview-light {
+  background-color: #FFFFFF !important;
+  color: #0A0D12 !important;
+}
+
+.theme-preview-light .preview-title {
+  color: #0A0D12 !important;
+}
+
+.theme-preview-light .preview-desc {
+  color: #4A5568 !important;
+}
+
+
+

@@ -21,7 +21,6 @@ import {
   ChevronRight,
   Sparkles,
   LogOut,
-  ShieldAlert,
 } from "lucide-react";
 import { useLMSStore } from "@/lib/store";
 import { GlobalSearchModal } from "@/components/ui/global-search";
@@ -156,7 +155,7 @@ export default function PlatformLayout({
             </div>
             <div className="flex flex-col">
               <span className="font-display font-black text-base tracking-tighter text-white uppercase group-hover:text-[#FF5C58] transition-colors">
-                RECON <span className="text-[#8E95A5] text-xs font-mono font-normal">// LMS</span>
+                RECON <span className="text-[#8E95A5] text-xs font-mono font-normal">{"//"} LMS</span>
               </span>
               <span className="font-mono text-[9px] uppercase tracking-widest text-[#8E95A5] hidden sm:block">
                 Academic & Arena Platform
@@ -169,19 +168,32 @@ export default function PlatformLayout({
         <div className="flex-1 max-w-[200px] sm:max-w-md lg:max-w-xl mx-2 sm:mx-6 flex items-center">
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="w-full h-10 bg-[#0B0D10] border-2 border-[#FFE600] shadow-[3px_3px_0px_#000000] hover:shadow-[3px_3px_0px_#FFE600] hover:border-white flex items-center justify-between px-2.5 sm:px-3 text-xs font-mono transition-all group select-none brutal-btn"
+            className={cn(
+              "w-full h-10 border-2 shadow-[3px_3px_0px_#000000] hover:shadow-[3px_3px_0px_#FFE600] flex items-center justify-between px-2.5 sm:px-3 text-xs font-mono transition-all group select-none brutal-btn",
+              themeMode === "light"
+                ? "bg-white border-black text-black hover:border-black"
+                : "bg-[#0B0D10] border-[#FFE600] hover:border-white text-white"
+            )}
             title="Search LMS Curriculum, Contests, Lessons & Code"
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-6 h-6 bg-[#FFE600] text-black border border-black flex items-center justify-center shrink-0 group-hover:bg-[#FF5C58] group-hover:text-white transition-colors">
                 <Search className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
-              <span className="text-white font-bold tracking-wide uppercase text-[11px] sm:text-xs truncate">
+              <span className={cn(
+                "font-bold tracking-wide uppercase text-[11px] sm:text-xs truncate",
+                themeMode === "light" ? "text-black" : "text-white"
+              )}>
                 <span className="hidden sm:inline">Search Courses, Contests, Lessons & Topics...</span>
                 <span className="sm:hidden">Search LMS...</span>
               </span>
             </div>
-            <span className="hidden lg:inline-flex items-center px-1.5 py-0.5 bg-[#1A1F2B] border border-[#FFE600] text-[9px] text-[#FFE600] font-bold uppercase tracking-widest shrink-0 ml-2">
+            <span className={cn(
+              "hidden lg:inline-flex items-center px-1.5 py-0.5 border text-[9px] font-bold uppercase tracking-widest shrink-0 ml-2",
+              themeMode === "light"
+                ? "bg-[#FFE600] border-black text-black"
+                : "bg-[#1A1F2B] border-[#FFE600] text-[#FFE600]"
+            )}>
               GLOBAL
             </span>
           </button>
@@ -192,7 +204,12 @@ export default function PlatformLayout({
           {/* Notification Button */}
           <button
             onClick={() => setIsNotificationDrawerOpen(true)}
-            className="relative p-2 bg-[#0B0D10] border-2 border-[#282F40] hover:border-white text-white transition-colors brutal-btn"
+            className={cn(
+              "relative p-2 border-2 transition-colors brutal-btn",
+              themeMode === "light"
+                ? "bg-white border-black text-black hover:bg-[#FFE600]"
+                : "bg-[#0B0D10] border-[#282F40] hover:border-white text-white"
+            )}
             aria-label="View notifications"
           >
             <Bell className="w-4 h-4" />
@@ -206,20 +223,29 @@ export default function PlatformLayout({
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 bg-[#0B0D10] border-2 border-[#282F40] hover:border-[#FFE600] text-white transition-colors brutal-btn"
-            title="Toggle theme contrast"
+            className={cn(
+              "p-2 border-2 transition-colors brutal-btn flex items-center justify-center",
+              themeMode === "light"
+                ? "bg-white border-black text-black hover:bg-[#FFE600]"
+                : "bg-[#0B0D10] border-[#282F40] hover:border-[#FFE600] text-white"
+            )}
+            title={themeMode === "dark" ? "Dark Mode (Click for Light Mode)" : "Light Mode (Click for Dark Mode)"}
+            aria-label="Toggle theme contrast"
           >
             {themeMode === "dark" ? (
-              <Sun className="w-4 h-4 text-[#FFE600]" />
+              <Moon className="w-4 h-4 text-[#FFE600]" />
             ) : (
-              <Moon className="w-4 h-4 text-[#2D7FF9]" />
+              <Sun className="w-4 h-4 text-amber-500 fill-amber-400" />
             )}
           </button>
 
           {/* User Profile Quick Link */}
           <Link
             href="/profile"
-            className="flex items-center gap-2 pl-2 border-l border-[#282F40] hover:opacity-90"
+            className={cn(
+              "flex items-center gap-2 pl-2 border-l hover:opacity-90",
+              themeMode === "light" ? "border-black" : "border-[#282F40]"
+            )}
           >
             <div className="w-8 h-8 border-2 border-black overflow-hidden bg-[#2D7FF9] shrink-0 brutal-shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -230,7 +256,10 @@ export default function PlatformLayout({
               />
             </div>
             <div className="hidden xl:flex flex-col text-left">
-              <span className="font-display font-bold text-xs uppercase leading-tight text-white">
+              <span className={cn(
+                "font-display font-bold text-xs uppercase leading-tight",
+                themeMode === "light" ? "text-black" : "text-white"
+              )}>
                 {currentUser.name}
               </span>
               <span className={cn("font-mono text-[10px] font-bold", ratingInfo.colorClass)}>
@@ -242,7 +271,12 @@ export default function PlatformLayout({
           {/* Explicit Sign Out Button */}
           <button
             onClick={logout}
-            className="px-2.5 py-1.5 bg-[#0B0D10] border-2 border-[#282F40] hover:border-[#FF5C58] hover:text-[#FF5C58] text-[#8E95A5] transition-colors font-mono text-xs uppercase font-bold flex items-center gap-1.5 brutal-btn ml-1"
+            className={cn(
+              "px-2.5 py-1.5 border-2 transition-colors font-mono text-xs uppercase font-bold flex items-center gap-1.5 brutal-btn ml-1",
+              themeMode === "light"
+                ? "bg-white border-black text-black hover:bg-[#FF5C58] hover:text-white"
+                : "bg-[#0B0D10] border-[#282F40] hover:border-[#FF5C58] hover:text-[#FF5C58] text-[#8E95A5]"
+            )}
             title="Sign out of your account"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -287,7 +321,9 @@ export default function PlatformLayout({
                       "flex items-center justify-between px-3 py-2.5 font-display font-bold text-xs uppercase tracking-wide border-2 transition-all",
                       isActive
                         ? "bg-[#FF5C58] text-white border-black brutal-shadow-sm translate-x-1"
-                        : "text-[#9DA7BC] hover:text-white bg-transparent border-transparent hover:border-[#282F40] hover:bg-[#1A1F2B]"
+                        : themeMode === "light"
+                          ? "text-[#1A1F2B] hover:text-black bg-transparent border-transparent hover:border-black hover:bg-[#EAEAE4]"
+                          : "text-[#9DA7BC] hover:text-white bg-transparent border-transparent hover:border-[#282F40] hover:bg-[#1A1F2B]"
                     )}
                   >
                     <div className="flex items-center gap-2.5">
@@ -298,7 +334,11 @@ export default function PlatformLayout({
                       <span
                         className={cn(
                           "px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase",
-                          item.badgeColor || "bg-[#282F40] text-[#DCE2EE]"
+                          item.badgeColor
+                            ? item.badgeColor
+                            : themeMode === "light"
+                              ? "bg-black text-white"
+                              : "bg-[#282F40] text-[#DCE2EE]"
                         )}
                       >
                         {item.badge}
