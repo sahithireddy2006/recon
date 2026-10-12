@@ -1,12 +1,72 @@
-import { neon } from "@neondatabase/serverless";
+import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
 import bcrypt from "bcryptjs";
 
-// Neon PostgreSQL connection string
-const connectionString =
-  process.env.DATABASE_URL ||
+// Default working Neon PostgreSQL connection string
+const DEFAULT_NEON_URL =
   "postgresql://neondb_owner:npg_bimRTwE9JjW7@ep-orange-cake-a7c1wfpb-pooler.ap-southeast-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
-export const sql = neon(connectionString);
+/**
+ * Sanitizes connection string:
+ * - Trims whitespace
+ * - Strips accidental wrapping quotes (common when pasting from .env into Vercel UI)
+ * - Validates URL format with fallback
+ */
+export function getCleanConnectionString(): string {
+  const raw = process.env.DATABASE_URL || DEFAULT_NEON_URL;
+  let clean = raw.trim();
+
+  // Strip accidental wrapping quotes
+  if (
+    (clean.startsWith('"') && clean.endsWith('"')) ||
+    (clean.startsWith("'") && clean.endsWith("'"))
+  ) {
+    clean = clean.slice(1, -1).trim();
+  }
+
+  // Validate URL format
+  try {
+    const parsed = new URL(clean);
+    if (parsed.protocol === "postgresql:" || parsed.protocol === "postgres:") {
+      return clean;
+    }
+  } catch {
+    console.warn("Invalid DATABASE_URL provided, falling back to default Neon DB endpoint.");
+  }
+
+  return DEFAULT_NEON_URL;
+}
+
+let cachedSql: NeonQueryFunction<false, false> | null = null;
+
+function getSql(): NeonQueryFunction<false, false> {
+  if (!cachedSql) {
+    const connStr = getCleanConnectionString();
+    cachedSql = neon(connStr);
+  }
+  return cachedSql;
+}
+
+/**
+ * Lazy Proxy: prevents neon() evaluation during build-time page data collection.
+ * Evaluates only when an actual database query is executed at runtime.
+ */
+export const sql = new Proxy(
+  ((..._args: unknown[]) => {}) as unknown as NeonQueryFunction<false, false>,
+  {
+    apply(_target, _thisArg, argArray) {
+      const executor = getSql();
+      return (executor as any)(...argArray);
+    },
+    get(_target, prop, receiver) {
+      const executor = getSql();
+      const val = Reflect.get(executor as any, prop, receiver);
+      if (typeof val === "function") {
+        return val.bind(executor);
+      }
+      return val;
+    },
+  }
+);
 
 /**
  * Check Neon DB connectivity
